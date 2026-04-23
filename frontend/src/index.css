@@ -1,0 +1,313 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Share+Tech+Mono&family=Unbounded:wght@300;400;500;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Azeret+Mono:wght@300;400;500&display=swap");
+
+@import "tailwindcss";
+
+:root {
+  /* Premium Typography System */
+  --font-display: 'Outfit', sans-serif;
+  --font-ui: 'Plus Jakarta Sans', sans-serif;
+  --font-technical: 'JetBrains Mono', monospace;
+
+  /* Global Theme Variables (Dark Mode Default) */
+  --bg-primary:        #0B1220;   /* Page background */
+  --bg-surface:        #111827;   /* Cards, panels, modals */
+  --bg-surface-alt:    #020617;   /* Table alt rows, inner panels */
+  --bg-sidebar:        #020617;   /* Sidebar */
+  --bg-sidebar-hover:  #1E293B;   /* Nav item hover */
+  --bg-nav-active:     #1E293B;   /* Active nav item */
+  --border-subtle:     #1E293B;   /* All borders & dividers */
+  --border-focus:      #06b6d4;   /* Input focus ring (cyan) */
+  --text-primary:      #F9FAFB;   /* Headings, bold labels */
+  --text-secondary:    #94A3B8;   /* Body text */
+  --text-muted:        #64748B;   /* Placeholders, helper text */
+  --text-disabled:     #475569;
+  --accent-teal:       #06b6d4;
+  --accent-teal-light: rgba(6, 182, 212, 0.1);
+  --accent-blue:       #06b6d4;
+  --accent-blue-light: rgba(6, 182, 212, 0.1);
+  --status-danger:     #EF4444;
+  --status-danger-bg:  rgba(239, 68, 68, 0.1);
+  --status-warning:    #F59E0B;
+  --status-warning-bg: rgba(245, 158, 11, 0.1);
+  --status-success:    #22C55E;
+  --status-success-bg: rgba(34, 197, 94, 0.1);
+
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 10px 40px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.5);
+
+  --transition-standard: background-color 300ms ease, color 300ms ease, border-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+  
+  color-scheme: dark;
+}
+
+/* Light Mode Override */
+.light-mode {
+  --bg-primary:        #F0F4F8;   /* Page background */
+  --bg-surface:        #FFFFFF;   /* Cards, panels, modals */
+  --bg-surface-alt:    #F7FAFC;   /* Table alt rows, inner panels */
+  --bg-sidebar:        #FFFFFF;   /* Sidebar */
+  --bg-sidebar-hover:  #EBF4FF;   /* Nav item hover */
+  --bg-nav-active:     #D6EFFF;   /* Active nav item */
+  --border-subtle:     #DDE3EB;   /* All borders & dividers */
+  --border-focus:      #06b6d4;   /* Input focus ring */
+  --text-primary:      #0F172A;   /* Headings, bold labels */
+  --text-secondary:    #334155;   /* Body text */
+  --text-muted:        #64748B;   /* Placeholders, helper text */
+  --text-disabled:     #94A3B8;
+  --accent-teal:       #06b6d4;
+  --accent-teal-light: rgba(6, 182, 212, 0.1);
+  --accent-blue:       #06b6d4;
+  --accent-blue-light: rgba(6, 182, 212, 0.1);
+  --status-danger:     #DC2626;
+  --status-danger-bg:  #FEE2E2;
+  --status-warning:    #D97706;
+  --status-warning-bg: #FEF3C7;
+  --status-success:    #16A34A;
+  --status-success-bg: #DCFCE7;
+
+  --shadow-card: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.05);
+  --shadow-hover: 0 4px 12px rgba(15,23,42,0.12);
+  --shadow-modal: 0 20px 50px rgba(15,23,42,0.18);
+
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  transition: var(--transition-standard);
+}
+
+/* Custom Webkit Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-divider);
+}
+
+/* Reusable Glass Components (from PRD Specification) */
+@layer components {
+
+  /* PRD 7. Card Component */
+  .med-card {
+    background-color: var(--bg-surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-standard);
+  }
+
+  .med-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  /* Typography Utilities */
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  .font-ui {
+    font-family: var(--font-ui);
+  }
+
+  .font-technical {
+    font-family: var(--font-technical);
+    letter-spacing: -0.01em;
+  }
+
+  /* PRD 9. Input Fields */
+  .med-input,
+  .med-select {
+    height: 42px;
+    background-color: var(--bg-surface-alt);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0 12px;
+    color: var(--text-primary);
+    outline: none;
+    transition: var(--transition-standard);
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .med-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .med-input:focus,
+  .med-select:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+  }
+
+  /* Dropdown Menu (Options) Styling */
+  .med-select option {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+  }
+
+  /* PRD 8. Buttons */
+  .med-btn-primary {
+    background-color: var(--accent-teal);
+    color: #FFFFFF;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: var(--transition-standard);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+  }
+
+  .med-btn-primary:hover {
+    background-color: #0891b2;
+    transform: translateY(-1px);
+  }
+
+  .med-btn-secondary {
+    background-color: var(--bg-surface);
+    border: 1.5px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition-standard);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .med-btn-secondary:hover {
+    background-color: var(--bg-surface-alt);
+    border-color: var(--accent-teal);
+    color: var(--accent-teal);
+  }
+
+  .med-btn-danger {
+    background-color: var(--status-danger);
+    color: #FFFFFF;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition-standard);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .med-btn-danger:hover {
+    background-color: #B91C1C;
+  }
+
+  /* PRD 10. Table Design */
+  .med-table-wrapper {
+    background-color: var(--bg-surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .med-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .med-table th {
+    background-color: var(--bg-surface-alt);
+    font-weight: 600;
+    font-size: 11px;
+    padding: 12px;
+    border-bottom: 1.5px solid var(--border-subtle);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .med-table td {
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--bg-surface-alt);
+    color: var(--text-primary);
+    transition: var(--transition-standard);
+    background-color: var(--bg-surface);
+    position: relative;
+  }
+
+  .med-table tr:hover td {
+    background-color: #F0F9FF; /* Specific light mode hover or use dynamic? */
+  }
+
+  .light-mode .med-table tr:hover td {
+    background-color: #F0F9FF;
+  }
+
+  .med-table tr:hover td:first-child::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--accent-teal);
+    z-index: 10;
+  }
+
+  /* Clinical Pattern Background */
+  .clinical-pattern {
+    background-image: radial-gradient(var(--border-subtle) 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+    opacity: 0.15;
+  }
+}
+
+
+/* Fix for background artifacts */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+}
+
+/* Custom Webkit Utilities */
+.css-invert-calendar::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
