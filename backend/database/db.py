@@ -237,7 +237,7 @@ def _init_db_sqlite():
             CREATE TABLE IF NOT EXISTS patients (
                 id                      INTEGER PRIMARY KEY AUTOINCREMENT,
                 patient_id              TEXT UNIQUE NOT NULL,
-                report_id               TEXT UNIQUE,
+                report_id               TEXT,
                 patient_name            TEXT NOT NULL,
                 age                     INTEGER,
                 gender                  TEXT,
@@ -249,7 +249,13 @@ def _init_db_sqlite():
                 image_path              TEXT,
                 prediction_result       TEXT,
                 subtype_result          TEXT,
+                subtype                 TEXT,
+                subtype_confidence      REAL,
                 survival_rate           REAL,
+                survival_months         INTEGER,
+                risk_category           TEXT,
+                survival_probability    REAL,
+                probability             REAL,
                 created_at              TEXT DEFAULT CURRENT_TIMESTAMP,
                 status_stage            TEXT DEFAULT "Pending Review",
                 notes                   TEXT DEFAULT "",
@@ -384,6 +390,51 @@ def migrate_db():
                 'ALTER TABLE patients ADD COLUMN clinical_history TEXT DEFAULT ""'
             )
             print('[DB] Added clinical_history column to patients')
+        except Exception:
+            pass
+
+        # Add subtype column if missing (needed by analysis_routes INSERT)
+        try:
+            cursor.execute(
+                'ALTER TABLE patients ADD COLUMN subtype TEXT'
+            )
+            print('[DB] Added subtype column to patients')
+        except Exception:
+            pass
+
+        # Add subtype_confidence column if missing
+        try:
+            cursor.execute(
+                'ALTER TABLE patients ADD COLUMN subtype_confidence REAL'
+            )
+            print('[DB] Added subtype_confidence column to patients')
+        except Exception:
+            pass
+
+        # Add survival_months column if missing
+        try:
+            cursor.execute(
+                'ALTER TABLE patients ADD COLUMN survival_months INTEGER'
+            )
+            print('[DB] Added survival_months column to patients')
+        except Exception:
+            pass
+
+        # Add risk_category column if missing
+        try:
+            cursor.execute(
+                'ALTER TABLE patients ADD COLUMN risk_category TEXT'
+            )
+            print('[DB] Added risk_category column to patients')
+        except Exception:
+            pass
+
+        # Add survival_probability column if missing
+        try:
+            cursor.execute(
+                'ALTER TABLE patients ADD COLUMN survival_probability REAL'
+            )
+            print('[DB] Added survival_probability column to patients')
         except Exception:
             pass
 

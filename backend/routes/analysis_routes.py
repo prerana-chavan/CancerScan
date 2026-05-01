@@ -276,7 +276,7 @@ def predict():
             )
         except Exception as e:
             current_app.logger.error(f"Internal error in run_analysis: {e}", exc_info=True)
-            return jsonify({'success': False, 'error': 'Image analysis failed. Please try again.'}), 500
+            return jsonify({'success': False, 'error': f'Database error: {str(e)}'}), 500
         finally:
             if conn:
                 conn.close()
