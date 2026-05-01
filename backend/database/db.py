@@ -222,7 +222,7 @@ def _init_db_sqlite():
                 medical_license_id  TEXT UNIQUE NOT NULL,
                 hospital            TEXT NOT NULL,
                 specialization      TEXT DEFAULT "Histopathology",
-                role                TEXT DEFAULT "doctor",
+                role                TEXT DEFAULT 'doctor',
                 is_approved         INTEGER DEFAULT 0,
                 is_active           INTEGER DEFAULT 1,
                 login_attempts      INTEGER DEFAULT 0,
@@ -257,7 +257,7 @@ def _init_db_sqlite():
                 survival_probability    REAL,
                 probability             REAL,
                 created_at              TEXT DEFAULT CURRENT_TIMESTAMP,
-                status_stage            TEXT DEFAULT "Pending Review",
+                status_stage            TEXT DEFAULT 'Pending Review',
                 notes                   TEXT DEFAULT "",
                 clinical_history        TEXT DEFAULT "",
                 is_flagged              INTEGER DEFAULT 0,
@@ -341,7 +341,7 @@ def migrate_db():
         try:
             cursor.execute(
                 'ALTER TABLE doctors ADD COLUMN '
-                'role TEXT DEFAULT "doctor"'
+                'role TEXT DEFAULT \'doctor\''
             )
             print('[DB] Added role column')
         except Exception:
@@ -387,7 +387,7 @@ def migrate_db():
         # Add clinical_history to patients if missing
         try:
             cursor.execute(
-                'ALTER TABLE patients ADD COLUMN clinical_history TEXT DEFAULT ""'
+                'ALTER TABLE patients ADD COLUMN clinical_history TEXT DEFAULT \'\''
             )
             print('[DB] Added clinical_history column to patients')
         except Exception:
@@ -478,7 +478,7 @@ def migrate_db():
         # (they were working before this system)
         cursor.execute(
             'UPDATE doctors SET is_approved = 1 '
-            'WHERE is_approved = 0 AND role = "doctor"'
+            'WHERE is_approved = 0 AND role = \'doctor\''
         )
 
         conn.commit()

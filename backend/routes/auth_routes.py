@@ -156,7 +156,7 @@ def register():
             INSERT INTO doctors
                 (full_name, email, password_hash, medical_license_id,
                  hospital, specialization, role, is_approved)
-            VALUES (?, ?, ?, ?, ?, ?, "doctor", 0)
+            VALUES (?, ?, ?, ?, ?, ?, 'doctor', 0)
         ''', (full_name, email, hashed,
               medical_license_id, hospital, specialization))
 

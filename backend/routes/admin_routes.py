@@ -37,7 +37,7 @@ def get_all_doctors():
                    is_approved, is_active,
                    created_at
             FROM doctors
-            WHERE role != "admin"
+            WHERE role != 'admin'
             ORDER BY created_at DESC
         ''').fetchall()
 
@@ -73,7 +73,7 @@ def toggle_doctor_approval(doctor_id):
         
         conn.execute(
             'UPDATE doctors SET is_approved = ? '
-            'WHERE id = ? AND role = "doctor"',
+            'WHERE id = ? AND role = \'doctor\'',
             (new_status, doctor_id)
         )
         conn.commit()
@@ -226,17 +226,17 @@ def get_stats():
 
         total_doctors  = conn.execute(
             'SELECT COUNT(*) FROM doctors '
-            'WHERE role != "admin"'
+            'WHERE role != \'admin\''
         ).fetchone()[0]
 
         pending        = conn.execute(
             'SELECT COUNT(*) FROM doctors '
-            'WHERE role != "admin" AND is_approved = 0'
+            'WHERE role != \'admin\' AND is_approved = 0'
         ).fetchone()[0]
 
         approved       = conn.execute(
             'SELECT COUNT(*) FROM doctors '
-            'WHERE role != "admin" AND is_approved = 1'
+            'WHERE role != \'admin\' AND is_approved = 1'
         ).fetchone()[0]
 
         total_patients = conn.execute(
