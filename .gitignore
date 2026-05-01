@@ -25,7 +25,6 @@ cancerscan.db
 # Large Datasets and Models
 backend/SubtypeClassificationDataset/
 backend/gatekeeper_dataset/
-backend/models_lcscnet_full/
 backend/normalized_cache/
 backend/images/
 backend/uploads/

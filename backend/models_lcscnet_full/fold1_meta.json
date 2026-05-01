@@ -1,0 +1,8 @@
+{
+  "class_weights": {
+    "0": 1.0,
+    "1": 1.0
+  },
+  "train_count": 8000,
+  "val_count": 2000
+}

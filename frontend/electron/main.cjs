@@ -29,26 +29,22 @@ function startBackend() {
             env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
         });
     } else {
-        mainBackendProcess = spawn(path.join(backendDir, 'app', 'app.exe'), [], {
-            cwd: path.join(backendDir, 'app'),
-            stdio: ['pipe', 'pipe', 'pipe']
-        });
-
-        mlBackendProcess = spawn(path.join(backendDir, 'api_server', 'api_server.exe'), [], {
-            cwd: path.join(backendDir, 'api_server'),
-            stdio: ['pipe', 'pipe', 'pipe']
-        });
+        // IN PRODUCTION: We use the Render Cloud Backend!
+        // This prevents Windows Defender from blocking hidden background processes.
+        console.log("Production Mode: Using Cloud Backend on Render. No local processes started.");
     }
 
-    const logProcess = (proc, name) => {
-        proc.stdout.on('data', (data) => console.log(`[${name}] ${data.toString().trim()}`));
-        proc.stderr.on('data', (data) => console.error(`[${name} ERR] ${data.toString().trim()}`));
-        proc.on('error', (err) => console.error(`Failed to start ${name}:`, err.message));
-        proc.on('exit', (code) => console.log(`${name} exited with code ${code}`));
-    };
+    if (isDev) {
+        const logProcess = (proc, name) => {
+            proc.stdout.on('data', (data) => console.log(`[${name}] ${data.toString().trim()}`));
+            proc.stderr.on('data', (data) => console.error(`[${name} ERR] ${data.toString().trim()}`));
+            proc.on('error', (err) => console.error(`Failed to start ${name}:`, err.message));
+            proc.on('exit', (code) => console.log(`${name} exited with code ${code}`));
+        };
 
-    logProcess(mainBackendProcess, 'Main API');
-    logProcess(mlBackendProcess, 'ML Engine');
+        logProcess(mainBackendProcess, 'Main API');
+        logProcess(mlBackendProcess, 'ML Engine');
+    }
 }
 
 function createWindow() {

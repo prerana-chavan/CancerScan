@@ -41,15 +41,6 @@
       "dist/**/*",
       "electron/**/*"
     ],
-    "extraResources": [
-      {
-        "from": "../backend/dist",
-        "to": "backend",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
     "win": {
       "target": "nsis"
     },
