@@ -70,12 +70,12 @@ class PgConnectionWrapper:
         self.row_factory = None  # Accepted but ignored; RealDictCursor is used
 
     def execute(self, query, params=None):
-        cursor = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor = self._conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         wrapper = PgCursorWrapper(cursor)
         return wrapper.execute(query, params)
 
     def cursor(self):
-        cursor = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor = self._conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         return PgCursorWrapper(cursor)
 
     def commit(self):
