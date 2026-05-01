@@ -255,4 +255,8 @@ def predict():
 
 if __name__ == '__main__':
     # Start on port 5001
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # debug=False is CRITICAL for Render: debug=True loads the model TWICE
+    # (via Flask's stat reloader), doubling RAM usage and crashing the 512MB instance.
+    import os
+    is_production = os.environ.get('RENDER', False)
+    app.run(host='0.0.0.0', port=5001, debug=not is_production)
