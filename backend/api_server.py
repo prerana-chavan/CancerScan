@@ -34,31 +34,48 @@ except Exception as e:
 
 def is_he_stained(img_pil):
     """
-    Quick color-based check to reject obviously non-histopathology images.
-    Real H&E slides are dominated by pink/purple tones (high R+B, moderate G).
-    Images that are mostly blue/teal/dark/green/bright-colored are NOT H&E slides.
+    Strict color-based check to reject non-histopathology images.
+    Real H&E slides are dominated by pink/purple tones (high R and B, moderate G)
+    with a generally bright white/transparent background.
     """
     try:
         img = np.array(img_pil.resize((128, 128)), dtype=np.float32)
         r, g, b = img[:,:,0], img[:,:,1], img[:,:,2]
         mean_r, mean_g, mean_b = np.mean(r), np.mean(g), np.mean(b)
-        # Calculate standard deviation between the color channels
-        # X-rays, CT scans, MRIs, and Ultrasounds are grayscale, so their R, G, and B means will be almost identical (std ≈ 0)
-        # H&E slides are colorful (pink/purple), so they will have a higher std between channels.
+        
+        brightness = (mean_r + mean_g + mean_b) / 3.0
         std_rgb = np.std([mean_r, mean_g, mean_b])
         
-        if std_rgb < 5: 
-            print("Gatekeeper rejected: Image is grayscale (likely X-ray, CT, MRI, or Ultrasound).")
+        print(f"[Gatekeeper] R:{mean_r:.1f} G:{mean_g:.1f} B:{mean_b:.1f} | Brightness:{brightness:.1f} Std:{std_rgb:.1f}")
+
+        # 1. Reject grayscale (X-rays, CT scans, MRIs, Ultrasounds, document scans)
+        if std_rgb < 8: 
+            print("Gatekeeper rejected: Image is grayscale or lacks color variance.")
             return False 
             
-        brightness = (mean_r + mean_g + mean_b) / 3.0
-        if brightness < 10: 
-            print("Gatekeeper rejected: Image is pitch black.")
+        # 2. Reject pitch black or very dark images
+        # H&E slides are backlit and mostly white/pink, so they are generally bright.
+        if brightness < 60: 
+            print("Gatekeeper rejected: Image is too dark to be a backlit H&E slide.")
             return False 
             
+        # 3. Reject images where Green is the dominant color (landscapes, nature, etc.)
+        # In H&E, Red and Blue dominate (pink/purple). Green should be the lowest or close to it.
+        if mean_g > mean_r and mean_g > mean_b:
+            print("Gatekeeper rejected: Green channel is dominant. Not an H&E slide.")
+            return False
+            
+        # 4. Reject images lacking the typical Red/Blue separation from Green.
+        # H&E slides have distinctly more Red (eosin) and Blue (hematoxylin) than Green.
+        if (mean_r + mean_b) < (mean_g * 1.5):
+            print("Gatekeeper rejected: Color profile doesn't match H&E (Red/Blue proportion too low).")
+            return False
+
+        print("Gatekeeper passed: Image looks like a valid H&E slide.")
         return True
-    except:
-        return True
+    except Exception as e:
+        print(f"Gatekeeper error: {e}")
+        return True # Fallback to accept if processing fails
 
 def rgb2od(I):
     I = I.astype(np.float32)
