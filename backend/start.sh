@@ -1,15 +1,14 @@
 #!/bin/bash
-# 1. Run the auto-seed to ensure Admin account exists (Fixes Render DB Wipe)
+# 1. Run the auto-seed to ensure Admin account exists
 python auto_seed.py
 
-# 2. Start the ML Server in the background on its hardcoded port (5001)
-export PORT=5001
+# 2. Start the ML Server in the background
+# api_server.py is hardcoded to 5001, we do not need to change PORT
 python api_server.py &
 
-# Wait 5 seconds for the ML server to initialize and load the model
+# Wait 5 seconds for the ML server to initialize
 sleep 5
 
-# 3. Start the Main API Server in the foreground using the Render-assigned port
-export PORT=$RENDER_PORT
-# We use gunicorn instead of python app.py for production stability
-gunicorn app:app --bind 0.0.0.0:$RENDER_PORT --timeout 120
+# 3. Start the Main API Server in the foreground
+# Render automatically provides the $PORT variable (usually 10000)
+gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120
