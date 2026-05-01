@@ -298,7 +298,7 @@ def login():
 
         # Update last login
         conn.execute(
-            "UPDATE doctors SET last_login=datetime('now') WHERE id=?",
+            "UPDATE doctors SET last_login=CURRENT_TIMESTAMP WHERE id=?",
             (doctor['id'],)
         )
         conn.commit()
