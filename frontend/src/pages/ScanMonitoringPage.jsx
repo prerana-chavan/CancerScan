@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Microscope, Search, RefreshCw, Trash2, Calendar, Hospital, User, ShieldAlert, CheckCircle, Loader2, Activity } from 'lucide-react';
+import { Microscope, Search, RefreshCw, Trash2, Calendar, Building2, User, ShieldAlert, CheckCircle, Loader2, Activity } from 'lucide-react';
 import { getPatients, searchPatients, deletePatient, adminGetPatients } from '../services/api';
 import { useNotifications } from '../context/NotificationContext';
 
@@ -141,7 +141,7 @@ export default function ScanMonitoringPage({ user }) {
                                                         <span className="text-[10px] text-[color:var(--text-secondary)] font-bold uppercase tracking-tight">Investigator: {scan.doctor_name || 'System Generated'}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1.5 mt-0.5">
-                                                        <Hospital size={10} className="text-[color:var(--text-muted)]" />
+                                                        <Building2 size={10} className="text-[color:var(--text-muted)]" />
                                                         <span className="text-[10px] text-[color:var(--text-muted)] font-black uppercase tracking-widest">{scan.hospital_name || scan.doctor_hospital || 'Central Registry Node'}</span>
                                                     </div>
                                                 </div>

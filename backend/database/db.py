@@ -2,9 +2,10 @@ import sqlite3
 import os
 import uuid
 
-DB_PATH = os.path.join(
-    os.path.dirname(__file__), '..', 'cancerscan.db'
-)
+# Use a shared folder in the user's home directory to ensure both app.exe and api_server.exe share the same database
+app_dir = os.path.join(os.path.expanduser('~'), '.cancerscan')
+os.makedirs(app_dir, exist_ok=True)
+DB_PATH = os.path.join(app_dir, 'cancerscan.db')
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH, timeout=30.0, check_same_thread=False)

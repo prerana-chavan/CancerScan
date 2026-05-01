@@ -4,7 +4,8 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 let mainWindow;
-let backendProcess;
+let mainBackendProcess;
+let mlBackendProcess;
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -13,29 +14,41 @@ function startBackend() {
         ? path.join(__dirname, '..', '..', 'backend')
         : path.join(process.resourcesPath, 'backend');
 
-    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    if (isDev) {
+        const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
 
-    backendProcess = spawn(pythonCmd, ['api_server.py'], {
-        cwd: backendDir,
-        stdio: ['pipe', 'pipe', 'pipe'],
-        env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
-    });
+        mainBackendProcess = spawn(pythonCmd, ['app.py'], {
+            cwd: backendDir,
+            stdio: ['pipe', 'pipe', 'pipe'],
+            env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
+        });
 
-    backendProcess.stdout.on('data', (data) => {
-        console.log(`[Backend] ${data.toString().trim()}`);
-    });
+        mlBackendProcess = spawn(pythonCmd, ['api_server.py'], {
+            cwd: backendDir,
+            stdio: ['pipe', 'pipe', 'pipe'],
+            env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
+        });
+    } else {
+        mainBackendProcess = spawn(path.join(backendDir, 'app', 'app.exe'), [], {
+            cwd: path.join(backendDir, 'app'),
+            stdio: ['pipe', 'pipe', 'pipe']
+        });
 
-    backendProcess.stderr.on('data', (data) => {
-        console.error(`[Backend ERR] ${data.toString().trim()}`);
-    });
+        mlBackendProcess = spawn(path.join(backendDir, 'api_server', 'api_server.exe'), [], {
+            cwd: path.join(backendDir, 'api_server'),
+            stdio: ['pipe', 'pipe', 'pipe']
+        });
+    }
 
-    backendProcess.on('error', (err) => {
-        console.error('Failed to start backend:', err.message);
-    });
+    const logProcess = (proc, name) => {
+        proc.stdout.on('data', (data) => console.log(`[${name}] ${data.toString().trim()}`));
+        proc.stderr.on('data', (data) => console.error(`[${name} ERR] ${data.toString().trim()}`));
+        proc.on('error', (err) => console.error(`Failed to start ${name}:`, err.message));
+        proc.on('exit', (code) => console.log(`${name} exited with code ${code}`));
+    };
 
-    backendProcess.on('exit', (code) => {
-        console.log(`Backend exited with code ${code}`);
-    });
+    logProcess(mainBackendProcess, 'Main API');
+    logProcess(mlBackendProcess, 'ML Engine');
 }
 
 function createWindow() {
@@ -135,12 +148,20 @@ ipcMain.handle('show-save-dialog', async (event, options) => {
 });
 
 app.whenReady().then(() => {
-    // Backend is managed externally by start_all.bat
-    setTimeout(createWindow, 1000);
+    // Start our backend servers
+    startBackend();
+    
+    // Wait for them to boot
+    setTimeout(createWindow, 2000);
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
+});
+
+app.on('will-quit', () => {
+    if (mainBackendProcess) mainBackendProcess.kill();
+    if (mlBackendProcess) mlBackendProcess.kill();
 });
 
 app.on('window-all-closed', () => {

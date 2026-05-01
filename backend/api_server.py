@@ -11,8 +11,16 @@ from tensorflow.keras.preprocessing.image import img_to_array
 
 app = Flask(__name__)
 
+import sys
+
+# PyInstaller path resolution
+if getattr(sys, 'frozen', False):
+    base_dir = sys._MEIPASS
+else:
+    base_dir = os.path.dirname(__file__)
+
 # Load model globally to avoid memory leak and lag
-MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models_lcscnet_full', 'lcscnet_fold1.h5')
+MODEL_PATH = os.path.join(base_dir, 'models_lcscnet_full', 'lcscnet_fold1.h5')
 print(f"Attempting to load ML model from {MODEL_PATH}...")
 try:
     model = load_model(MODEL_PATH)

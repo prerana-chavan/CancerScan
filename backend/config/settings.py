@@ -8,8 +8,8 @@ load_dotenv()
 
 class Settings:
     def __init__(self):
-        self.PORT           = os.getenv('PORT')
-        self.JWT_SECRET     = os.getenv('JWT_SECRET')
+        self.PORT           = os.getenv('PORT', '5099')
+        self.JWT_SECRET     = os.getenv('JWT_SECRET', 'cancer_scan_super_secure_jwt_secret_key_2026_xyz_12345')
         self.JWT_EXPIRES_IN = os.getenv('JWT_EXPIRES_IN', '8h')
         self.BCRYPT_ROUNDS  = int(os.getenv('BCRYPT_ROUNDS', 12))
         self.FRONTEND_URL   = os.getenv('FRONTEND_URL',

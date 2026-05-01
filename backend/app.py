@@ -32,7 +32,12 @@ def not_found(e):
 # Serve slide images for UI and PDF generation
 @app.route('/api/images/slides/<path:filename>')
 def serve_slide_image(filename):
-    slides_dir = os.path.join(os.path.dirname(__file__), 'uploads', 'slides')
+    import sys
+    if getattr(sys, 'frozen', False):
+        base_dir = sys._MEIPASS
+    else:
+        base_dir = os.path.dirname(__file__)
+    slides_dir = os.path.join(base_dir, 'uploads', 'slides')
     return send_from_directory(slides_dir, filename)
 
 # Init DB

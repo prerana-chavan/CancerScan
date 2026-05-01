@@ -3,6 +3,14 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
+# Build Outputs
+frontend/dist/
+frontend/dist-electron/
+backend/dist/
+backend/build/
+*.exe
+*.dll
+
 # Python
 __pycache__/
 *.py[cod]
