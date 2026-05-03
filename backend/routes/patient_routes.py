@@ -300,14 +300,21 @@ def delete_patient(patient_id):
     try:
         conn = get_connection()
 
-        # Verify patient belongs to
-        # this doctor before deleting
+        # Handle PostgreSQL strict typing (cannot compare string 'P-...' to integer id)
+        if str(patient_id).startswith('P-') or not str(patient_id).isdigit():
+            where_col = 'patient_id'
+            param_val = patient_id
+        else:
+            where_col = 'id'
+            param_val = int(patient_id)
+
+        # Verify patient belongs to this doctor before deleting
         patient = conn.execute(
-            'SELECT id, patient_id, patient_name, doctor_id '
-            'FROM patients '
-            'WHERE (id = ? OR patient_id = ?) '
-            'AND doctor_id = ?',
-            (patient_id, patient_id, g.user.get('id'))
+            f'SELECT id, patient_id, patient_name, doctor_id '
+            f'FROM patients '
+            f'WHERE {where_col} = ? '
+            f'AND doctor_id = ?',
+            (param_val, g.user.get('id'))
         ).fetchone()
 
         if not patient:
@@ -318,10 +325,10 @@ def delete_patient(patient_id):
 
         # Delete permanently from DB
         cursor = conn.execute(
-            'DELETE FROM patients '
-            'WHERE (id = ? OR patient_id = ?) '
-            'AND doctor_id = ?',
-            (patient_id, patient_id, g.user.get('id'))
+            f'DELETE FROM patients '
+            f'WHERE {where_col} = ? '
+            f'AND doctor_id = ?',
+            (param_val, g.user.get('id'))
         )
         deleted_rows = cursor.rowcount
         conn.commit()
