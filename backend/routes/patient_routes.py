@@ -317,17 +317,14 @@ def delete_patient(patient_id):
             }), 404
 
         # Delete permanently from DB
-        conn.execute(
+        cursor = conn.execute(
             'DELETE FROM patients '
             'WHERE (id = ? OR patient_id = ?) '
             'AND doctor_id = ?',
             (patient_id, patient_id, g.user.get('id'))
         )
+        deleted_rows = cursor.rowcount
         conn.commit()
-
-        deleted_rows = conn.execute(
-            'SELECT changes()'
-        ).fetchone()[0]
 
         logger.info(f'Permanently removed: '
               f'{patient_id} '
