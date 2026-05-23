@@ -1,12 +1,17 @@
 import os
 from flask import Flask, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from database.db import init_db
 from routes.auth_routes import auth_bp
 from routes.patient_routes import patient_bp
 from routes.analysis_routes import analysis_bp
 from routes.admin_routes import admin_bp
+from routes.hospital_routes import hospital_bp
 
 app = Flask(__name__)
 CORS(app) # Allow cross-origin requests
@@ -16,6 +21,7 @@ app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(patient_bp, url_prefix='/api/patients')
 app.register_blueprint(analysis_bp, url_prefix='/api/analysis')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
+app.register_blueprint(hospital_bp, url_prefix='/api/hospitals')
 
 # Unauthenticated health check fallback (used by frontend to redirect if backend down)
 @app.route('/health', methods=['GET'])

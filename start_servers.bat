@@ -11,6 +11,6 @@ echo Starting Electron Desktop App...
 start cmd /k "cd frontend && npm start"
 
 echo.
-echo All 3 servers are starting in separate windows!
+echo Both servers are starting in separate windows!
 echo Once they are running, you can test the Google Places Autocomplete.
 pause

@@ -18,14 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { predict } from '../services/api';
-
-const HOSPITALS = [
-    'City General Hospital',
-    'Metropolitan Medical Center',
-    'St. Judes Research',
-    'Mayo Clinic Network',
-    'Johns Hopkins Medicine'
-];
+import HospitalAutocomplete from '../components/HospitalAutocomplete';
 
 export default function NewAnalysisPage() {
     const { user, token } = useAuth();
@@ -39,6 +32,7 @@ export default function NewAnalysisPage() {
     const doctorHospital = user?.hospital || 'Clinical Gateway';
 
     // === STEP 8: FORM STATE MANAGEMENT ===
+    const [patientHospital, setPatientHospital] = useState(user?.hospital || 'Clinical Gateway');
     const [patientName, setPatientName] = useState("");
     const [age, setAge] = useState("");
     const [date, setDate] = useState(
@@ -169,7 +163,7 @@ export default function NewAnalysisPage() {
             formData.append('specimenType', specimenType);
             formData.append('referralSource', referralSource);
             formData.append('clinicalHistory', clinicalHistory.trim());
-            formData.append('hospitalNetwork', doctorHospital);
+            formData.append('hospitalNetwork', patientHospital);
 
             // Call the real ML prediction API
             const data = await predict(formData, (progressEvent) => {
@@ -207,7 +201,7 @@ export default function NewAnalysisPage() {
                 specimenType: specimenType,
                 referralSource: referralSource,
                 attendingPathologist: loggedInDoctor,
-                hospitalNetwork: doctorHospital,
+                hospitalNetwork: patientHospital,
                 doctorId: user?.id,
                 clinicalHistory: clinicalHistory.trim(),
                 uploadedImage: uploadedImage,
@@ -291,7 +285,7 @@ export default function NewAnalysisPage() {
                         </div>
                         <div>
                             <h2 className="text-[18px] font-bold text-[color:var(--text-primary)] mb-1">{patientName}</h2>
-                            <p className="text-[13px] text-[color:var(--text-muted)]">{age} yrs • {gender} • {doctorHospital}</p>
+                            <p className="text-[13px] text-[color:var(--text-muted)]">{age} yrs • {gender} • {patientHospital}</p>
                         </div>
                     </div>
 
@@ -674,7 +668,7 @@ export default function NewAnalysisPage() {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-[24px]">
 
                 {/* ═══ LEFT: Patient Details ═══ */}
-                <div className="med-card !mb-0 h-min">
+                <div className="med-card !mb-0 h-min relative z-10">
                     <div className="flex items-center gap-3 mb-[24px]">
                         <UserPlus size={20} className="text-[var(--accent-blue)]" />
                         <h2 className="text-[18px] font-bold text-[var(--text-primary)] font-display tracking-tight">Patient Context</h2>
@@ -745,7 +739,12 @@ export default function NewAnalysisPage() {
                             </div>
                             <div>
                                 <label className="block text-[12px] font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Hospital Network</label>
-                                <input className="med-input opacity-70" value={doctorHospital} disabled />
+                                <HospitalAutocomplete
+                                    value={patientHospital}
+                                    onChange={setPatientHospital}
+                                    placeholder="Search hospital..."
+                                    variant={isDark ? 'dark' : 'light'}
+                                />
                             </div>
                         </div>
 

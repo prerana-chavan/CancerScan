@@ -129,7 +129,11 @@ const drawSignOff = (doc, startY, data) => {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
-    doc.text(hospitalNetwork, 18, y + 12);
+    let displayHosp = hospitalNetwork;
+    if (displayHosp.length > 55) {
+        displayHosp = displayHosp.substring(0, 52) + '...';
+    }
+    doc.text(displayHosp, 18, y + 12);
     doc.text('DATE: ' + formatToDDMMYYYY(new Date()), 18, y + 18);
 
     doc.setFontSize(7.5);
@@ -337,7 +341,13 @@ export const generatePatientPDF = async (patientRecord) => {
         labelValue(doc, 18, contentY + 16.5, "Gender", gender);
         labelValue(doc, 18, contentY + 22, "Smoking", smokingHistory, smokeColor);
 
-        labelValue(doc, 108, contentY, "Hospital", hospitalNetwork);
+        // Truncate hospital name to fit the right column (max ~35 chars)
+        let displayHospital = hospitalNetwork;
+        if (displayHospital.length > 35) {
+            displayHospital = displayHospital.substring(0, 32) + '...';
+        }
+
+        labelValue(doc, 108, contentY, "Hospital", displayHospital);
         labelValue(doc, 108, contentY + 5.5, "Pathologist", attendingPathologist);
         labelValue(doc, 108, contentY + 11, "Referral", referralSource);
         labelValue(doc, 108, contentY + 16.5, "Scan Date", scanDateDisplay);

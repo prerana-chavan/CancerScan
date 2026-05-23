@@ -164,4 +164,10 @@ export const adminGetSystemHealth = async () => {
     return res.data
 }
 
+// ── Hospital Search ──────────────────────────────────
+export const searchHospitals = async (query) => {
+    const res = await api.get(`/hospitals/search?q=${encodeURIComponent(query)}`)
+    return res.data
+}
+
 export default api;

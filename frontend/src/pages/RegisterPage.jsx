@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import HospitalAutocomplete from '../components/HospitalAutocomplete';
 
 export default function RegisterPage() {
     const { register } = useAuth();
@@ -10,7 +11,7 @@ export default function RegisterPage() {
         password: '',
         confirmPassword: '',
         medicalLicenseId: '',
-        hospital: 'City General Hospital',
+        hospital: '',
         specialization: 'Histopathology'
     });
     const [loading, setLoading] = useState(false);
@@ -264,11 +265,13 @@ export default function RegisterPage() {
                                     </div>
                                     <div>
                                         <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#374151', marginBottom: 6, letterSpacing: 1.5, textTransform: 'uppercase', fontFamily: fm }}>Institution</label>
-                                        <select value={form.hospital} onChange={set('hospital')} style={{ width: '100%', padding: '12px 14px', background: '#F8FAFC', border: '1.5px solid rgba(6,182,212,0.15)', borderRadius: 10, fontSize: 13, fontFamily: fb, outline: 'none', color: '#0B1220' }}>
-                                            <option>City General Hospital</option>
-                                            <option>Apollo Medical Center</option>
-                                            <option>AIIMS Hospital</option>
-                                        </select>
+                                        <HospitalAutocomplete
+                                            value={form.hospital}
+                                            onChange={(val) => setForm({ ...form, hospital: val })}
+                                            placeholder="Search your hospital..."
+                                            variant="light"
+                                            inputStyle={{ width: '100%', padding: '12px 14px', background: '#F8FAFC', border: '1.5px solid rgba(6,182,212,0.15)', borderRadius: 10, fontSize: 13, fontFamily: fb, outline: 'none', color: '#0B1220' }}
+                                        />
                                     </div>
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

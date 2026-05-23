@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserPlus, Trash2, Edit2, Search, UserCheck, UserX, UserSearch, X, Shield, RefreshCw } from 'lucide-react';
+import { UserPlus, Trash2, Edit2, Search, UserCheck, UserX, X, Shield, RefreshCw } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
 import { useAdmin } from '../context/AdminContext';
 
