@@ -14,6 +14,7 @@ def serialize_patient(row):
     Any access, modification, or export of these fields MUST be audit-logged.
     """
     keys = row.keys() if hasattr(row, 'keys') else []
+    row_dict = dict(row) if hasattr(row, 'keys') else {}
     
     d = {
         "id":               row["id"],
@@ -30,16 +31,16 @@ def serialize_patient(row):
         "ai_diagnosis":     row["prediction_result"],     # [PII] Diagnosis result
         "probability":      row["probability"] if "probability" in keys else 0,
         
-        # New ML Result Fields mapping
-        "subtype":              row["subtype"] if "subtype" in keys and row["subtype"] is not None else (row["subtype_result"] if "subtype_result" in keys else None),
-        "subtype_confidence":   row["subtype_confidence"] if "subtype_confidence" in keys and row["subtype_confidence"] is not None else 0,
-        "survival_probability": row["survival_probability"] if "survival_probability" in keys and row["survival_probability"] is not None else 0,
-        "survival_months":      row["survival_months"] if "survival_months" in keys and row["survival_months"] is not None else 0,
-        "risk_category":        row["risk_category"] if "risk_category" in keys and row["risk_category"] is not None else None,
+        # New ML Result Fields mapping - use robust dictionary conversion to prevent missing keys issues
+        "subtype":              row_dict.get("subtype") or row_dict.get("subtype_result"),
+        "subtype_confidence":   row_dict.get("subtype_confidence") or 0,
+        "survival_probability": row_dict.get("survival_probability") or 0,
+        "survival_months":      row_dict.get("survival_months") or 0,
+        "risk_category":        row_dict.get("risk_category"),
         
         # Legacy/old table maps
-        "subtype_result":   row["subtype_result"] if "subtype_result" in keys else None,
-        "survival_rate":    row["survival_rate"] if "survival_rate" in keys else None,
+        "subtype_result":   row_dict.get("subtype_result"),
+        "survival_rate":    row_dict.get("survival_rate"),
         
         "status":           row["status_stage"],
         "notes":            row["notes"],                 # [PII] Clinical notes
@@ -105,31 +106,29 @@ def create_patient():
         probability             = data.get('probability')
         uploaded_image_path     = data.get('uploadedImage') # Storing base64 for now as per frontend
 
+        subtype                 = data.get('cancerSubtype') or data.get('subtype')
+        subtype_confidence      = data.get('subtype_confidence', 0)
+        survival_months         = data.get('survivalMonths') or data.get('survival_months', 0)
+        survival_probability    = data.get('survival_probability', 0)
+        risk_category           = data.get('riskCategory') or data.get('risk_category')
+
         conn = get_connection()
         cursor = conn.execute('''
             INSERT INTO patients (
                 patient_id, report_id, patient_name, age, diagnosis_date, gender, 
                 smoking_history, specimen_type, pathologist_name, hospital_name,
                 prediction_result, image_path, status_stage, doctor_id,
-                clinical_history
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                clinical_history, subtype, subtype_confidence, survival_months,
+                survival_probability, risk_category, probability
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
-            clinical_id,
-            report_id,
-            patient_name,
-            age,
-            date,
-            gender,
-            smoking_history,
-            specimen_type,
-            attending_pathologist,
-            hospital_network,
-            ai_diagnosis,
-            uploaded_image_path,
-            'Pending Review',
-            g.user.get('id'),
-            clinical_history
+            clinical_id, report_id, patient_name, age, date, gender,
+            smoking_history, specimen_type, attending_pathologist, hospital_network,
+            ai_diagnosis, uploaded_image_path, 'Pending Review', g.user.get('id'),
+            clinical_history, subtype, subtype_confidence, survival_months,
+            survival_probability, risk_category, probability
         ))
+
         new_id = cursor.lastrowid
         conn.commit()
 
