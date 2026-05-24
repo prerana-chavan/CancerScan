@@ -23,7 +23,7 @@ else:
 MODEL_PATH = os.path.join(base_dir, 'models_lcscnet_full', 'lcscnet_fold1.h5')
 print(f"Attempting to load ML model from {MODEL_PATH}...")
 try:
-    model = load_model(MODEL_PATH)
+    model = load_model(MODEL_PATH, compile=False)
     print("✓ Model loaded successfully.")
 except Exception as e:
     print(f"✗ Failed to load model: {e}")

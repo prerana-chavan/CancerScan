@@ -14,6 +14,7 @@ from routes.admin_routes import admin_bp
 from routes.hospital_routes import hospital_bp
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB max upload — prevents RAM spikes on free tier
 CORS(app) # Allow cross-origin requests
 
 # Register blueprints
