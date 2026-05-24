@@ -4,6 +4,9 @@ import random
 import logging
 import mimetypes
 import tempfile
+import base64
+from io import BytesIO
+from PIL import Image
 import requests
 from datetime import datetime
 from flask import Blueprint, request, jsonify, g, current_app
@@ -235,6 +238,29 @@ def predict():
             surv_months = int(survival_data.get('predicted_months') or ml_result.get('survival_months') or 0)
             risk_cat    = str(survival_data.get('risk_category') or ml_result.get('risk_category') or '').strip()
 
+        # ── Convert image to base64 for DB persistence ──
+        # Render's ephemeral filesystem wipes uploads on redeploy,
+        # so we store a compressed base64 data URI directly in the DB.
+        image_data_uri = unique_name  # fallback to filename
+        try:
+            with Image.open(file_path) as img_for_db:
+                img_for_db = img_for_db.convert('RGB')
+                # Resize to max 500px width for reasonable DB size
+                max_w = 500
+                if img_for_db.width > max_w:
+                    ratio = max_w / img_for_db.width
+                    img_for_db = img_for_db.resize(
+                        (max_w, int(img_for_db.height * ratio)),
+                        Image.LANCZOS
+                    )
+                buf = BytesIO()
+                img_for_db.save(buf, format='JPEG', quality=75)
+                b64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+                image_data_uri = f'data:image/jpeg;base64,{b64}'
+                logger.info(f"Image converted to base64 ({len(b64)//1024}KB)")
+        except Exception as img_err:
+            logger.warning(f"Could not convert image to base64: {img_err}")
+
         # ── Save to database ───────────────────────
         conn = None
         try:
@@ -253,7 +279,7 @@ def predict():
             ''', (
                 ids['clinical_id'], ids['report_id'], patient_name, int(age), date, gender,
                 smoking_history, specimen_type, hospital_network, g.user['name'],
-                unique_name, ai_diagnosis, subtype_val,
+                image_data_uri, ai_diagnosis, subtype_val,
                 sub_conf, surv_months, risk_cat,
                 surv_prob, 'Pending Review', probability, g.user['id'],
                 clinical_history
@@ -306,7 +332,7 @@ def predict():
             'survivalMonths': surv_months,
             'survival_probability': surv_prob,
             'riskCategory':  risk_cat,
-            'uploaded_image_path': unique_name,
+            'uploaded_image_path': image_data_uri,
             'mlDetails':     ml_result
         })
 
