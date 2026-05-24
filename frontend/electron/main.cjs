@@ -59,6 +59,7 @@ function createWindow() {
             preload: path.join(__dirname, 'preload.cjs'),
             nodeIntegration: false,
             contextIsolation: true,
+            additionalArguments: [app.isPackaged ? '--is-packaged' : '--is-dev'],
         },
         autoHideMenuBar: true,
     });

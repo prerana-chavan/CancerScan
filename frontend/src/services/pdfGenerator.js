@@ -444,7 +444,11 @@ export const generatePatientPDF = async (patientRecord) => {
 
         let diagBoxHeight = 20;
 
-        if (isCancer && subtype) {
+        if (isCancer) {
+            // Fallbacks in case the Render DB has missing data
+            const displaySubtype = subtype || "Pending Review / Unknown";
+            const displayConf = subtype_confidence ? `${subtype_confidence}%` : "N/A";
+            
             let sy = currentY + 22; // Start just below the diagnosis label
 
             // Draw subtype label
@@ -453,17 +457,26 @@ export const generatePatientPDF = async (patientRecord) => {
             doc.setTextColor(30, 41, 59); // HexColor('#1e293b')
             doc.text("SUBTYPE:", 18, sy);
             doc.setFont('helvetica', 'normal');
-            doc.text(`${subtype} (Confidence: ${subtype_confidence}%)`, 18 + 25, sy);
+            doc.text(`${displaySubtype} (Confidence: ${displayConf})`, 18 + 25, sy);
             sy += 6;
             diagBoxHeight += 6;
 
-            if (survival_probability != null) {
+            let formattedProb = "N/A";
+            let formattedMonths = "N/A";
+            let formattedRisk = "Unknown";
+
+            if (survival_probability != null && survival_probability > 0) {
+                // If it's a fraction like 0.45, multiply by 100. If it's already 45, leave it.
+                formattedProb = survival_probability < 1 ? (survival_probability * 100).toFixed(1) + "%" : survival_probability.toFixed(1) + "%";
+                formattedMonths = survival_months ? survival_months.toString() : "N/A";
+                formattedRisk = risk_category || "Unknown";
+                
                 // Draw survival label
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(30, 41, 59);
                 doc.text("SURVIVAL PROBABILITY:", 18, sy);
                 doc.setFont('helvetica', 'normal');
-                doc.text(`${survival_probability}%  |  Est. ${survival_months} months  |  Risk: ${risk_category}`, 18 + 50, sy);
+                doc.text(`${formattedProb}  |  Est. ${formattedMonths} months  |  Risk: ${formattedRisk}`, 18 + 50, sy);
                 sy += 6;
                 diagBoxHeight += 6;
             }
@@ -488,12 +501,12 @@ export const generatePatientPDF = async (patientRecord) => {
             doc.setTextColor(30, 41, 59);
             doc.text("SUBTYPE:", 18 + 4, currentY + 22);
             doc.setFont('helvetica', 'normal');
-            doc.text(`${subtype} (Confidence: ${subtype_confidence}%)`, 18 + 4 + 25, currentY + 22);
-            if (survival_probability != null) {
+            doc.text(`${displaySubtype} (Confidence: ${displayConf})`, 18 + 4 + 25, currentY + 22);
+            if (survival_probability != null && survival_probability > 0) {
                 doc.setFont('helvetica', 'bold');
                 doc.text("SURVIVAL PROBABILITY:", 18 + 4, currentY + 28);
                 doc.setFont('helvetica', 'normal');
-                doc.text(`${survival_probability}%  |  Est. ${survival_months} months  |  Risk: ${risk_category}`, 18 + 4 + 50, currentY + 28);
+                doc.text(`${formattedProb}  |  Est. ${formattedMonths} months  |  Risk: ${formattedRisk}`, 18 + 4 + 50, currentY + 28);
             }
         }
 
