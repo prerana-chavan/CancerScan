@@ -276,4 +276,6 @@ if __name__ == '__main__':
     # (via Flask's stat reloader), doubling RAM usage and crashing the 512MB instance.
     import os
     is_production = os.environ.get('RENDER', False)
-    app.run(host='0.0.0.0', port=5001, debug=not is_production)
+    # Bind to localhost on Render so the port scanner doesn't get confused by 2 open ports
+    bind_host = '127.0.0.1' if is_production else '0.0.0.0'
+    app.run(host=bind_host, port=5001, debug=not is_production)

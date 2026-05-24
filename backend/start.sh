@@ -9,9 +9,9 @@ export RENDER=true
 python api_server.py &
 
 # 4. Wait for TensorFlow to fully load the model
-# TF needs 30-60 seconds on a free-tier CPU server.
+# TF now loads much faster with compile=False
 echo "Waiting for ML model to load..."
-sleep 45
+sleep 5
 
 # 5. Start the Main API Server in the foreground
 # --timeout 300 gives TF enough time for the first (cold) prediction.
