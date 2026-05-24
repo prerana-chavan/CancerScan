@@ -70,8 +70,10 @@ function createWindow() {
         mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
     }
 
-    // Auto-open Chrome DevTools so user can inspect console errors
-    mainWindow.webContents.openDevTools();
+    // Only open DevTools in development, not in packaged .exe
+    if (isDev) {
+        mainWindow.webContents.openDevTools();
+    }
 
     mainWindow.webContents.on('before-input-event', async (event, input) => {
         if (input.key === 'F11' && input.type === 'keyDown') {
