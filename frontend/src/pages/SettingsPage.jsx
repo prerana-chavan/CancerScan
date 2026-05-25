@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { Eye, EyeOff } from 'lucide-react'
 import api from '../services/api'
 
 export default function SettingsPage() {
@@ -625,7 +626,7 @@ function PasswordFieldEnhanced({
             fontSize: '16px', padding: 0,
           }}
         >
-          {show ? '👁️' : '🙈'}
+          {show ? <Eye size={18} /> : <EyeOff size={18} />}
         </button>
       </div>
     </div>

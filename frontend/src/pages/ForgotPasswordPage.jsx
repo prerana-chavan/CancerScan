@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import api from '../services/api'
 
 export default function ForgotPasswordPage() {
@@ -418,7 +419,7 @@ export default function ForgotPasswordPage() {
                     onFocus={e => { e.target.style.borderColor = '#06b6d4'; e.target.style.boxShadow = '0 0 0 3px rgba(6,182,212,.15)' }}
                     onBlur={e => { e.target.style.borderColor = 'rgba(6,182,212,0.2)'; e.target.style.boxShadow = 'none' }}
                   />
-                  <button onClick={() => setShowPw(p => !p)} style={{ position: 'absolute', right: 12, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#64748b' }}>{showPw ? '👁️' : '🙈'}</button>
+                  <button onClick={() => setShowPw(p => !p)} style={{ position: 'absolute', right: 12, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#64748b', display: 'flex', alignItems: 'center' }}>{showPw ? <Eye size={16} /> : <EyeOff size={16} />}</button>
                 </div>
               </div>
 
@@ -433,7 +434,7 @@ export default function ForgotPasswordPage() {
                     onFocus={e => { e.target.style.borderColor = '#06b6d4'; e.target.style.boxShadow = '0 0 0 3px rgba(6,182,212,.15)' }}
                     onBlur={e => { e.target.style.borderColor = 'rgba(6,182,212,0.2)'; e.target.style.boxShadow = 'none' }}
                   />
-                  <button onClick={() => setShowCPw(p => !p)} style={{ position: 'absolute', right: 12, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#64748b' }}>{showCPw ? '👁️' : '🙈'}</button>
+                  <button onClick={() => setShowCPw(p => !p)} style={{ position: 'absolute', right: 12, background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#64748b', display: 'flex', alignItems: 'center' }}>{showCPw ? <Eye size={16} /> : <EyeOff size={16} />}</button>
                 </div>
               </div>
 
