@@ -49,29 +49,11 @@ const getProbColor = (prob, status) => {
 };
 
 export default function PatientRecordsPage() {
-    const { patients, isLoading, deletePatient, updateReviewStatus, updateNotes, mergePatients, fetchPatients, deleteAllPatients } = usePatients();
+    const { patients, isLoading, updateReviewStatus, updateNotes, fetchPatients } = usePatients();
     const [selectedIds, setSelectedIds] = useState(new Set());
     const location = useLocation();
 
-    const [clearing, setClearing] = useState(false);
-
-    const handleClearAll = async () => {
-        const confirmed = window.confirm(
-            `Delete ALL ${patients.length} patient records?\n\n` +
-            `This cannot be undone.`
-        );
-        if (!confirmed) return;
-
-        setClearing(true);
-        try {
-            await deleteAllPatients();
-            alert('All records deleted successfully.');
-        } catch (err) {
-            alert(`Failed to delete: ${err.message}`);
-        } finally {
-            setClearing(false);
-        }
-    };
+    // Removed handleClearAll
 
     // The component expects "records" in a specific format (name instead of patientName, id instead of clinicalId etc)
     const records = useMemo(() => {
@@ -141,8 +123,7 @@ export default function PatientRecordsPage() {
 
     // UI State
     const [quickViewId, setQuickViewId] = useState(null);
-    const [showMergeModal, setShowMergeModal] = useState(false);
-    const [mergeGroupFilter, setMergeGroupFilter] = useState(null);
+    // Removed Merge State
 
 
     // Stats — always from full patients array, not filtered:
@@ -154,24 +135,7 @@ export default function PatientRecordsPage() {
         }
     }, [records]);
 
-    // Duplicate detection
-    const duplicateGroups = useMemo(() => {
-        const groupsMap = new Map();
-        records.forEach(r => {
-            const key = `${r.name}|${r.age}|${r.gender}|${r.date}`;
-            if (!groupsMap.has(key)) groupsMap.set(key, []);
-            groupsMap.get(key).push(r);
-        });
-        return Array.from(groupsMap.values()).filter(g => g.length > 1);
-    }, [records]);
-
-    const duplicatesByRecordId = useMemo(() => {
-        const map = new Map();
-        duplicateGroups.forEach((group) => {
-            group.forEach(r => map.set(r.id, group));
-        });
-        return map;
-    }, [duplicateGroups]);
+    // Removed Duplicate Detection
 
     // Filtering
     const filteredRecords = useMemo(() => {
@@ -270,26 +234,7 @@ export default function PatientRecordsPage() {
         }
     };
 
-    const handleDelete = async (patientId) => {
-        const confirmed = window.confirm(
-            'Permanently delete this patient record? This cannot be undone.'
-        );
-        if (!confirmed) return;
-
-        const result = await deletePatient(patientId);
-
-        if (result?.success) {
-            console.log('[UI] Record deleted:', patientId);
-            setSelectedIds(prev => {
-                const next = new Set(prev);
-                next.delete(patientId);
-                return next;
-            });
-            if (quickViewId === patientId) setQuickViewId(null);
-        } else {
-            alert('Delete failed: ' + (result?.error || 'Unknown error'));
-        }
-    };
+    // Removed handleDelete
 
     // === XLSX EXPORT (Phases 3-12) ===
     const formatDateDDMMYYYY = (dateStr) => {
@@ -639,19 +584,7 @@ export default function PatientRecordsPage() {
         updateNotes(quickViewId, val);
     };
 
-    const handleMergeGroup = (groupIdentifier, keepId) => {
-        const group = duplicateGroups.find(g => `${g[0].name}|${g[0].age}|${g[0].gender}|${g[0].date}` === groupIdentifier);
-        if (!group) return;
-
-        const idsToDelete = group.filter(r => r.id !== keepId).map(r => r.id);
-        mergePatients(keepId, idsToDelete);
-
-        setSelectedIds(prev => {
-            const next = new Set(prev);
-            idsToDelete.forEach(id => next.delete(id));
-            return next;
-        });
-    };
+    // Removed handleMergeGroup
 
     const quickViewData = records.find(r => r.id === quickViewId);
 
@@ -669,26 +602,6 @@ export default function PatientRecordsPage() {
                     <p className="text-[14px] text-[var(--text-muted)]">Manage and export all clinical analyses and diagnostic reports.</p>
                 </div>
                 <div className="flex gap-3">
-                    <button
-                        onClick={handleClearAll}
-                        disabled={clearing || patients.length === 0}
-                        style={{
-                            backgroundColor: '#dc2626',
-                            color: 'white',
-                            border: 'none',
-                            padding: '8px 16px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            opacity: clearing ? 0.6 : 1,
-                            fontWeight: '500',
-                            fontSize: '14px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                        }}
-                    >
-                        <Trash2 size={16} /> {clearing ? 'Clearing...' : 'Clear All Records'}
-                    </button>
                     <button onClick={() => exportExcel(filteredRecords, `CancerScan_PatientReport_${getTodayDDMMYYYY()}.xlsx`)} className="flex items-center gap-2 px-4 py-2 border border-[color:var(--border-subtle)] text-[color:var(--text-primary)] rounded-md hover:bg-[color:var(--bg-surface-alt)] transition-colors text-sm font-medium">
                         <Download size={16} /> Export Excel
                     </button>
@@ -715,18 +628,7 @@ export default function PatientRecordsPage() {
                 ))}
             </div>
 
-            {/* SECTION 3: DUPLICATE BANNER */}
-            {duplicateGroups.length > 0 && (
-                <div className="mb-6 flex items-center justify-between bg-[rgba(227,179,65,0.08)] border border-[#e3b341] rounded-lg p-4">
-                    <div className="flex items-center gap-3 text-[#e3b341]">
-                        <AlertTriangle size={20} />
-                        <span className="font-semibold text-sm">Action Required: {duplicateGroups.length} potential duplicate record groups detected in the clinical registry.</span>
-                    </div>
-                    <button onClick={() => { setMergeGroupFilter(null); setShowMergeModal(true); }} className="px-4 py-1.5 border border-[#e3b341] text-[#e3b341] rounded hover:bg-[#e3b341]/10 text-sm font-medium transition-colors">
-                        Review & Merge All
-                    </button>
-                </div>
-            )}
+            {/* SECTION 3: DUPLICATE BANNER (Removed) */}
 
             {/* SECTION 4: FILTER BAR */}
             <div className="flex items-center justify-between mb-4">
@@ -780,9 +682,6 @@ export default function PatientRecordsPage() {
                             {paginatedRecords.length === 0 ? (
                                 <tr><td colSpan={7} className="p-10 text-center text-[color:var(--text-muted)]">No records found.</td></tr>
                             ) : paginatedRecords.map(r => {
-                                const duplicates = duplicatesByRecordId.get(r.id);
-                                const isFirstDupInGroup = duplicates && duplicates[0].id === r.id;
-
                                 return (
                                     <tr key={r.id} onClick={() => setQuickViewId(r.id)} className="group hover:bg-[color:var(--bg-surface-alt)] transition-colors cursor-pointer">
                                         <td className="p-4 text-center" onClick={e => e.stopPropagation()}>
@@ -790,11 +689,6 @@ export default function PatientRecordsPage() {
                                         </td>
                                         <td className="p-4 border-l-2 border-transparent">
                                             <span className="text-[color:var(--accent-teal)] hover:underline" onClick={(e) => { e.stopPropagation(); setQuickViewId(r.id); }}>{r.id}</span>
-                                            {isFirstDupInGroup && (
-                                                <span className="block mt-1 text-[10px] bg-[rgba(227,179,65,0.15)] text-[#e3b341] px-1.5 py-0.5 rounded w-max font-bold border border-[#e3b341]/30 cursor-pointer" onClick={(e) => { e.stopPropagation(); setMergeGroupFilter(`${r.name}|${r.age}|${r.gender}|${r.date}`); setShowMergeModal(true); }}>
-                                                    + {duplicates.length} DUPES
-                                                </span>
-                                            )}
                                         </td>
                                         <td className="p-4">
                                             <div className="font-bold text-[14px] text-[color:var(--text-primary)]">{r.name}</div>
@@ -820,7 +714,6 @@ export default function PatientRecordsPage() {
                                         <td className="p-4 text-right pr-6">
                                             <div className="flex items-center justify-end gap-3 transition-opacity">
                                                 <ExternalLink size={18} className="text-[color:var(--text-muted)] hover:text-[color:var(--accent-teal)] cursor-pointer" title="Open Full View" onClick={(e) => { e.stopPropagation(); setQuickViewId(r.id); }} />
-                                                <Trash2 size={18} className="text-[color:var(--text-muted)] hover:text-[#f85149] cursor-pointer" title="Delete Record" onClick={(e) => { e.stopPropagation(); handleDelete(r.id); }} />
                                             </div>
                                         </td>
                                     </tr>
@@ -857,31 +750,7 @@ export default function PatientRecordsPage() {
                 )}
             </AnimatePresence>
 
-            {/* SECTION 7: MERGE MODAL */}
-            <AnimatePresence>
-                {showMergeModal && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-[color:var(--bg-surface)] border border-[color:var(--border-subtle)] rounded-xl w-full max-w-[720px] max-h-[80vh] flex flex-col">
-                            <div className="flex items-center justify-between p-5 border-b border-[color:var(--border-subtle)]">
-                                <h2 className="text-xl font-bold text-[color:var(--text-primary)]">Duplicate Records Review</h2>
-                                <button onClick={() => setShowMergeModal(false)} className="text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)]"><X size={20} /></button>
-                            </div>
-                            <div className="p-5 flex-1 overflow-y-auto space-y-6">
-                                {(mergeGroupFilter ? duplicateGroups.filter(g => `${g[0].name}|${g[0].age}|${g[0].gender}|${g[0].date}` === mergeGroupFilter) : duplicateGroups).map((group) => {
-                                    const groupIdentifier = `${group[0].name}|${group[0].age}|${group[0].gender}|${group[0].date}`;
-                                    return (
-                                        <MergeGroupCard key={groupIdentifier} group={group} onMerge={(keepId) => handleMergeGroup(groupIdentifier, keepId)} />
-                                    );
-                                })}
-                            </div>
-                            <div className="p-5 border-t border-[color:var(--border-subtle)] flex flex-col items-center gap-3">
-                                {duplicateGroups.length > 0 && !mergeGroupFilter && <span className="text-[#e3b341] text-xs font-semibold uppercase tracking-wider">⚠ {duplicateGroups.length} groups not yet reviewed</span>}
-                                <button onClick={() => setShowMergeModal(false)} className="w-full bg-[color:var(--accent-teal)] text-black font-bold py-2.5 rounded-lg hover:bg-[#00cbb2] transition-colors">Done</button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* SECTION 7: MERGE MODAL (Removed) */}
 
             {/* SECTION 8: QUICK VIEW PANEL */}
             <AnimatePresence>
@@ -1203,53 +1072,4 @@ export default function PatientRecordsPage() {
     );
 }
 
-// Subcomponent for Merge Modal
-function MergeGroupCard({ group, onMerge }) {
-    const [keepId, setKeepId] = useState(group[0].id);
-    const [merged, setMerged] = useState(false);
-
-    if (merged) {
-        return (
-            <div className="bg-[color:var(--accent-teal)]/10 border border-[#00e5cc]/30 rounded-lg p-6 flex flex-col items-center justify-center text-[color:var(--accent-teal)] transition-all h-32">
-                <ShieldCheck size={32} className="mb-2" />
-                <span className="font-bold">Records Merged Successfully</span>
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-[color:var(--bg-primary)] border border-[color:var(--border-subtle)] rounded-lg overflow-hidden">
-            <div className="bg-[#e3b341]/10 px-4 py-3 flex items-center gap-2 border-b border-[color:var(--border-subtle)]">
-                <AlertTriangle size={16} className="text-[#e3b341]" />
-                <span className="text-sm font-bold text-[color:var(--text-primary)]">Group: {group[0].name}</span>
-            </div>
-            <table className="w-full text-left text-sm">
-                <thead>
-                    <tr className="bg-[color:var(--bg-surface)] text-[color:var(--text-muted)] border-b border-[color:var(--border-subtle)] text-xs uppercase tracking-wider">
-                        <th className="p-3 text-center">Keep</th>
-                        <th className="p-3">Clinical ID</th>
-                        <th className="p-3">Date</th>
-                        <th className="p-3">Status</th>
-                        <th className="p-3">Prob</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-[#21262d]">
-                    {group.map(r => (
-                        <tr key={r.id} className="hover:bg-[color:var(--bg-surface-alt)]">
-                            <td className="p-3 text-center"><input type="radio" className="accent-[#00e5cc]" checked={keepId === r.id} onChange={() => setKeepId(r.id)} /></td>
-                            <td className="p-3 text-[color:var(--accent-teal)]">{r.id}</td>
-                            <td className="p-3 text-[color:var(--text-primary)]">{r.date.split('-').reverse().join('/')}</td>
-                            <td className="p-3"><span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold border ${getStatusStyle(r.status)}`}>{r.status}</span></td>
-                            <td className={`p-3 font-bold ${getProbColor(r.probability)}`}>{r.probability}%</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-            <div className="p-4 bg-[color:var(--bg-surface)] border-t border-[color:var(--border-subtle)] flex justify-end">
-                <button onClick={() => { onMerge(keepId); setMerged(true); }} className="border border-[#00e5cc] text-[color:var(--accent-teal)] px-4 py-1.5 rounded text-sm font-medium hover:bg-[color:var(--accent-teal)]/10 transition-colors">
-                    Merge Group
-                </button>
-            </div>
-        </div>
-    );
-}
+// MergeGroupCard removed

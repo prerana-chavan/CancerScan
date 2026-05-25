@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { useAuth } from './AuthContext';
 import { 
     createPatient as apiCreatePatient,
-    deleteAllPatients as apiDeleteAllPatients,
     updatePatientStatus as apiUpdateStatus,
     updatePatientNotes as apiUpdateNotes
 } from '../services/api';
@@ -91,48 +90,7 @@ export const PatientProvider = ({ children }) => {
         }
     }, []);
 
-    // DELETE patient
-    const deletePatient = async (patientId) => {
-        try {
-            console.log('[DELETE] Removing:', patientId);
-
-            // Call backend DELETE API
-            const res = await api.delete(`/patients/${patientId}`);
-            const data = res.data || res;
-
-            if (data.success) {
-                // Remove from state immediately
-                // WITHOUT refetching from server
-                setPatients(prev =>
-                    prev.filter(p => p.id !== patientId && p.patient_id !== patientId)
-                );
-                console.log('[DELETE] Removed from state:', patientId);
-                return { success: true };
-            } else {
-                console.error('[DELETE] Failed:', data.error);
-                return { success: false, error: data.error };
-            }
-
-        } catch (err) {
-            console.error('[DELETE] Error:', err);
-            return { success: false, error: err.message };
-        }
-    };
-
-    // DELETE ALL patients
-    const deleteAllPatients = useCallback(async () => {
-        try {
-            const result = await apiDeleteAllPatients();
-            if (result.success) {
-                setPatients([]);
-                return { success: true };
-            }
-            return { success: false, error: result.error };
-        } catch (err) {
-            console.error('Delete all patients failed:', err);
-            return { success: false, error: 'Connection error' };
-        }
-    }, []);
+    // Removed deletePatient and deleteAllPatients
 
     // UPDATE review status
     const updateReviewStatus = useCallback(async (patientId, newStatus) => {
@@ -174,11 +132,7 @@ export const PatientProvider = ({ children }) => {
         }
     }, [patients]);
 
-    const mergePatients = useCallback((keepId, deleteIds) => {
-        setPatients(prev =>
-            prev.filter(p => !deleteIds.includes(p.patient_id))
-        );
-    }, []);
+    // Removed mergePatients
 
     return (
         <PatientContext.Provider value={{
@@ -186,11 +140,8 @@ export const PatientProvider = ({ children }) => {
             setPatients,
             isLoading,
             addPatient,
-            deletePatient,
-            deleteAllPatients,
             updateReviewStatus,
             updateNotes,
-            mergePatients,
             fetchPatients
         }}>
             {children}

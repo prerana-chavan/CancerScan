@@ -86,15 +86,7 @@ export const createPatient = async (patientData) => {
     return res.data;
 };
 
-export const deletePatient = async (patientId) => {
-    const res = await api.delete(`/patients/${patientId}`);
-    return res.data;
-};
-
-export const deleteAllPatients = async () => {
-    const res = await api.delete('/patients');
-    return res.data;
-};
+// Removed deletePatient and deleteAllPatients
 
 export const updatePatientStatus = async (patientId, status) => {
     const res = await api.patch(`/patients/${patientId}/status`, { reviewStatus: status });
