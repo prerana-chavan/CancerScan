@@ -9,7 +9,6 @@ export default function UserManagementPage() {
     const { doctors, loading, approveDoctor, deleteDoctor, refreshData, resetPassword } = useAdmin();
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('All');
-    const [showProvisionModal, setShowProvisionModal] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
 
     const filteredUsers = doctors.filter(u => {
@@ -45,12 +44,6 @@ export default function UserManagementPage() {
         }
     };
 
-    const handleProvision = (e) => {
-        // ... handled by RegisterPage for now, or add adminProvisionDoctor API
-        e.preventDefault();
-        addNotification('Restricted Action', 'Manual provisioning disabled. Use registration portal.', 'warning');
-    };
-
     return (
         <motion.div 
             initial={{ opacity: 0, y: 10 }}
@@ -61,14 +54,6 @@ export default function UserManagementPage() {
                 <div className="flex flex-col gap-1">
                     <h2 className="text-2xl font-black text-[color:var(--text-primary)] tracking-tight uppercase font-display">User Governance</h2>
                     <p className="text-xs font-bold text-[color:var(--text-secondary)] uppercase tracking-widest">Control access, assign clinical roles, and monitor investigator activity</p>
-                </div>
-                <button
-                    onClick={() => setShowProvisionModal(true)}
-                    className="px-6 py-2.5 rounded-xl bg-teal-500 text-white hover:bg-teal-400 font-bold text-xs shadow-lg shadow-teal-500/20 transition-all flex items-center gap-2 group cursor-pointer uppercase tracking-widest"
-                >
-                    <UserPlus size={18} className="group-hover:rotate-12 transition-transform" />
-                    Provision User
-                </button>
             </div>
 
             <div className="bg-[color:var(--bg-surface)] border border-[color:var(--border-subtle)] rounded-2xl overflow-hidden shadow-2xl">
@@ -177,59 +162,6 @@ export default function UserManagementPage() {
                     </table>
                 </div>
             </div>
-
-            {/* Provision Modal */}
-            <AnimatePresence>
-                {showProvisionModal && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="med-card w-full max-w-[500px] shadow-2xl"
-                        >
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold text-[color:var(--text-primary)] flex items-center gap-2">
-                                    <Shield className="text-[color:var(--accent-teal)]" />
-                                    Provision Clinical User
-                                </h2>
-                                <button onClick={() => setShowProvisionModal(false)} className="text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)]">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleProvision} className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-[color:var(--text-muted)] uppercase mb-1.5">Full Name</label>
-                                    <input name="name" required className="med-input w-full" placeholder="Dr. Jane Doe" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-[color:var(--text-muted)] uppercase mb-1.5">Clinical Role</label>
-                                        <select name="role" className="med-input w-full">
-                                            <option>Pathologist</option>
-                                            <option>Researcher</option>
-                                            <option>Admin</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-[color:var(--text-muted)] uppercase mb-1.5">Email</label>
-                                        <input name="email" type="email" required className="med-input w-full" placeholder="jane@hospital.org" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-[color:var(--text-muted)] uppercase mb-1.5">Affiliated Hospital</label>
-                                    <input name="hospital" required className="med-input w-full" placeholder="Central Medical Hub" />
-                                </div>
-                                <div className="pt-4 flex gap-3">
-                                    <button type="button" onClick={() => setShowProvisionModal(false)} className="med-btn-secondary flex-1">Cancel</button>
-                                    <button type="submit" className="med-btn-primary flex-1">Provision Account</button>
-                                </div>
-                            </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
 
             {/* Edit Modal (Mock) */}
             <AnimatePresence>
