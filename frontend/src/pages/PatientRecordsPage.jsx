@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx-js-style';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import {
     Download, FileText, Users, ShieldAlert, ShieldCheck, BarChart2,
     AlertTriangle, ExternalLink, Trash2, Calendar, ChevronDown, ChevronUp, ImageOff,
-    X, ChevronLeft, ChevronRight, RefreshCw
+    X, ChevronLeft, ChevronRight, RefreshCw, Loader2
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { usePatients } from '../context/PatientContext';
@@ -51,6 +53,7 @@ const getProbColor = (prob, status) => {
 export default function PatientRecordsPage() {
     const { patients, isLoading, updateReviewStatus, updateNotes, fetchPatients } = usePatients();
     const [selectedIds, setSelectedIds] = useState(new Set());
+    const [isExportingPDFs, setIsExportingPDFs] = useState(false);
     const location = useLocation();
 
     // Removed handleClearAll
@@ -562,20 +565,34 @@ export default function PatientRecordsPage() {
         XLSX.writeFile(wb, filename);
     };
 
-    const exportPDF = () => {
+    const exportPDF = async () => {
         if (filteredRecords.length === 0) return;
+        setIsExportingPDFs(true);
 
-        // Export each filtered record as a professional clinical report
-        filteredRecords.forEach((record, index) => {
-            // Find the original record from context to get all fields
-            const fullRecord = patients.find(p => p.patient_id === record.id);
-            if (!fullRecord) return;
+        try {
+            const zip = new JSZip();
+            
+            for (let i = 0; i < filteredRecords.length; i++) {
+                const record = filteredRecords[i];
+                // Find the original record from context to get all fields
+                const fullRecord = patients.find(p => p.patient_id === record.id);
+                if (!fullRecord) continue;
 
-            // Adding a slight delay between downloads to prevent browser blocking
-            setTimeout(() => {
-                generatePatientPDF(fullRecord);
-            }, index * 800);
-        });
+                const result = await generatePatientPDF(fullRecord, true);
+                if (result && result.doc) {
+                    const pdfBlob = result.doc.output('blob');
+                    zip.file(result.filename, pdfBlob);
+                }
+            }
+            
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            saveAs(zipBlob, `CancerScan_Patient_Reports_${getTodayDDMMYYYY()}.zip`);
+        } catch (error) {
+            console.error('Error generating ZIP:', error);
+            alert('Failed to generate ZIP file.');
+        } finally {
+            setIsExportingPDFs(false);
+        }
     };
 
 
@@ -605,8 +622,9 @@ export default function PatientRecordsPage() {
                     <button onClick={() => exportExcel(filteredRecords, `CancerScan_PatientReport_${getTodayDDMMYYYY()}.xlsx`)} className="flex items-center gap-2 px-4 py-2 border border-[color:var(--border-subtle)] text-[color:var(--text-primary)] rounded-md hover:bg-[color:var(--bg-surface-alt)] transition-colors text-sm font-medium">
                         <Download size={16} /> Export Excel
                     </button>
-                    <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 bg-[color:var(--accent-teal)] text-black rounded-md hover:bg-[#00cbb2] transition-colors text-sm font-medium">
-                        <FileText size={16} /> Export PDF Report
+                    <button onClick={exportPDF} disabled={isExportingPDFs} className="flex items-center gap-2 px-4 py-2 bg-[color:var(--accent-teal)] text-black rounded-md hover:bg-[#00cbb2] transition-colors text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed">
+                        {isExportingPDFs ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />} 
+                        {isExportingPDFs ? 'Exporting ZIP...' : 'Export PDFs as ZIP'}
                     </button>
                 </div>
             </div>
