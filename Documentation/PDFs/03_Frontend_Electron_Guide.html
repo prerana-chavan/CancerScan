@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03. Frontend & Electron Guide — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+.tip-box{border-left:4px solid #10b981;margin:18px 0;padding:14px 22px;background:#ecfdf5;border-radius:0 10px 10px 0;color:#065f46}
+.tip-box::before{content:"💡 TIP";font-weight:700;display:block;margin-bottom:6px}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+<span class="doc-badge">CANCERSCAN DOCUMENTATION</span>
+
+<h1>03. Frontend & Electron Guide</h1>
+
+<p>CancerScan's frontend is built using <strong>React 18</strong> and <strong>Vite</strong>, and then wrapped into a native Windows Desktop Application using <strong>Electron 28</strong>.</p>
+<p>This means doctors don't access the app through a website; they download an <code>.exe</code> file and install it on their computer.</p>
+
+<h2>1. Tech Stack</h2>
+<ul>
+<li><strong>UI Framework:</strong> React 18</li>
+<li><strong>Build Tool:</strong> Vite 5 (extremely fast compiling)</li>
+<li><strong>Desktop Wrapper:</strong> Electron 28</li>
+<li><strong>Styling:</strong> Tailwind CSS 4</li>
+<li><strong>Routing:</strong> React Router v6</li>
+<li><strong>HTTP Client:</strong> Axios</li>
+<li><strong>Charts:</strong> Recharts</li>
+</ul>
+
+<h2>2. API Connection Logic (api.js)</h2>
+<p>The frontend is smart enough to know if it is running locally for development, or if it has been packaged into an <code>.exe</code> for production.</p>
+<p><strong>File:</strong> <code>frontend/src/config/api.js</code></p>
+
+<pre><code>// Automatically detect if we are running packaged .exe
+const isAsarPackaged = window.location.href.includes('app.asar');
+const isPackagedExe = (window.electronAPI && window.electronAPI.isPackaged) || isAsarPackaged;
+
+// If packaged .exe -> Use Render Backend
+// If local development -> Use localhost
+const useProductionBackend = isPackagedExe;
+
+const BASE_URL = useProductionBackend ? 'https://cancerscan.onrender.com' : 'http://localhost:5099';
+const ML_URL   = useProductionBackend ? 'https://cancerscan.onrender.com' : 'http://localhost:5001';</code></pre>
+
+<h2>3. How to Package the <code>.exe</code> File</h2>
+<p>When you are ready to distribute your app to the professors or judges, you need to "build" the <code>.exe</code> installer.</p>
+
+<h3>Step-by-Step Build Process:</h3>
+<ol>
+<li>Open Command Prompt.</li>
+<li>Navigate to the frontend folder:
+<pre><code>cd path\to\CancerScan\frontend</code></pre></li>
+<li>Run the packaging command:
+<pre><code>npm run package</code></pre></li>
+<li><strong>What happens next?</strong>
+<ul>
+<li>Vite compiles all the React code into plain HTML/JS (<code>frontend/dist/</code>).</li>
+<li>Electron-Builder takes that HTML/JS and wraps it inside a Chromium browser shell.</li>
+<li>It creates a Windows NSIS Installer.</li>
+</ul></li>
+<li><strong>Where is the file?</strong>
+<ul>
+<li>Go to <code>frontend/dist-electron/</code></li>
+<li>You will find a file named <strong><code>CancerScan Setup 1.0.0.exe</code></strong>.</li>
+</ul></li>
+</ol>
+
+<div class="tip-box">
+This <code>.exe</code> file is what you will upload to GitHub Releases for people to download! (See the GitHub Release Guide).
+</div>
+
+<h2>4. Local Development</h2>
+<p>If you just want to edit the React code and see changes live without building an <code>.exe</code> every time, run:</p>
+<pre><code>cd frontend
+npm start</code></pre>
+<p>This boots up a live-reloading Electron window. When you save a <code>.jsx</code> file, the window updates instantly.</p>
+
+</body>
+</html>

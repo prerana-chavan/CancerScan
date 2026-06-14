@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05. ML Engine Documentation — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+.tip-box{border-left:4px solid #10b981;margin:18px 0;padding:14px 22px;background:#ecfdf5;border-radius:0 10px 10px 0;color:#065f46}
+.tip-box::before{content:"💡 TIP";font-weight:700;display:block;margin-bottom:6px}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+<span class="doc-badge">CANCERSCAN DOCUMENTATION</span>
+
+<h1>05. ML Engine Documentation</h1>
+
+<p>The Machine Learning Engine is a dedicated Flask micro-service (<code>api_server.py</code>) running on <strong>Port 5001</strong>.</p>
+<p>It is entirely separated from the database and authentication logic, focusing <em>only</em> on image processing and TensorFlow inference.</p>
+
+<h2>1. The TensorFlow Model</h2>
+<ul>
+<li><strong>File:</strong> <code>models_lcscnet_full/lcscnet_fold1.h5</code></li>
+<li><strong>Size:</strong> ~4.5 MB</li>
+<li><strong>Framework:</strong> TensorFlow 2 / Keras</li>
+<li><strong>Output:</strong> 3-class probability array <code>[Adenocarcinoma, Normal, Squamous Cell Carcinoma]</code></li>
+</ul>
+
+<div class="tip-box">
+<strong>RAM Optimization:</strong> The model is loaded into memory using <code>compile=False</code>. This tells TensorFlow not to load the training optimizer (Adam/SGD), which saves roughly 80MB of RAM on the Render server.
+</div>
+
+<h2>2. The Inference Pipeline</h2>
+<p>When an image hits <code>POST /predict</code> on the ML Engine, it goes through 3 strict phases:</p>
+
+<h3>Phase 1: The Gatekeeper (H&E Validation)</h3>
+<p>If a user uploads a picture of a dog or a selfie, the ML model will blindly try to classify it as lung cancer. To prevent this, the Gatekeeper function (<code>is_he_stained</code>) analyzes the RGB pixels.</p>
+<p>It checks if the image consists of standard Hematoxylin (Purple/Blue) and Eosin (Pink) colors. If the image is grayscale, or lacks the pink/purple tissue signature, it rejects the image with a <code>422 Unprocessable Entity</code> error before TensorFlow even sees it.</p>
+
+<h3>Phase 2: Macenko Normalization</h3>
+<p>Different hospitals use different amounts of dye when staining slides. One slide might be dark purple, another might be light pink.</p>
+<p>The <code>normalize_macenko()</code> function mathematically isolates the stain vectors and standardizes the colors to a reference template. This ensures the ML model isn't confused by lighting or dye concentration. <em>During this phase, the image is also resized to exactly 224×224 pixels.</em></p>
+
+<h3>Phase 3: TensorFlow Inference</h3>
+<ol>
+<li>The 224×224 image is converted to an array and normalized (divided by 255.0).</li>
+<li><code>model.predict()</code> is called.</li>
+<li>The model outputs 3 probabilities (e.g., <code>[0.85, 0.10, 0.05]</code>).</li>
+<li>The system calculates the highest probability.</li>
+<li>If the confidence is below 55%, the system overrides the result and returns <strong>"Inconclusive — Manual Review Required"</strong>.</li>
+</ol>
+
+<h2>3. Demo Overrides</h2>
+<p>For presentation purposes, the ML Engine includes a demo override. If the filename of the uploaded image contains specific keywords, it bypasses the neural network and forces a specific result:</p>
+<ul>
+<li>Filename contains <code>lungn</code> or <code>normal</code> → Forces <strong>Benign</strong> result</li>
+<li>Filename contains <code>lungscc</code> or <code>scc</code> → Forces <strong>Squamous Cell Carcinoma</strong> result</li>
+<li>Filename contains <code>lungaca</code> or <code>aca</code> → Forces <strong>Adenocarcinoma</strong> result</li>
+</ul>
+<p>This ensures that during the college Viva presentation, the demo works perfectly predictably.</p>
+
+</body>
+</html>

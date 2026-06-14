@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04. Backend API Documentation — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+.endpoint{display:inline-block;background:#1e293b;color:#10b981;padding:3px 10px;border-radius:6px;font-family:'Fira Code',monospace;font-size:9.5pt;margin:2px 0}
+.method{display:inline-block;padding:2px 8px;border-radius:4px;font-size:8.5pt;font-weight:700;font-family:'Fira Code',monospace;margin-right:6px}
+.method-get{background:#dbeafe;color:#1d4ed8}
+.method-post{background:#dcfce7;color:#166534}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+<span class="doc-badge">CANCERSCAN DOCUMENTATION</span>
+
+<h1>04. Backend API Documentation</h1>
+
+<p>The main backend server is built using <strong>Python</strong> and <strong>Flask</strong>. It handles all database operations, authentication, and routing. It runs on <strong>Port 5099</strong> locally.</p>
+
+<h2>1. Core Configuration (<code>app.py</code>)</h2>
+<p>The <code>app.py</code> file is the entry point for the backend.</p>
+<ul>
+<li>It initializes the database connection.</li>
+<li>It registers CORS (Cross-Origin Resource Sharing) so the Electron frontend can talk to it.</li>
+<li>It registers the "Blueprints" (Route files).</li>
+<li>It sets a strict <strong>10MB upload limit</strong> to prevent the server from crashing if a user uploads a massive file (<code>app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024</code>).</li>
+</ul>
+
+<h2>2. API Route Blueprints</h2>
+<p>The backend is split into 5 distinct route files located in <code>backend/routes/</code>:</p>
+
+<h3>A. Authentication (<code>auth_routes.py</code>)</h3>
+<p>Handles all security and identity.</p>
+<ul>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/auth/register</span> — Creates a new doctor account (hashes password with bcrypt).</li>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/auth/login</span> — Verifies password, returns a JWT token valid for 8 hours. Includes brute-force protection (5 attempts per minute).</li>
+</ul>
+
+<h3>B. Admin Panel (<code>admin_routes.py</code>)</h3>
+<p>Secured by the <code>@require_admin</code> decorator.</p>
+<ul>
+<li><span class="method method-get">GET</span> <span class="endpoint">/api/admin/doctors/pending</span> — Lists doctors waiting for approval.</li>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/admin/doctors/&lt;id&gt;/approve</span> — Grants system access to a doctor.</li>
+<li><span class="method method-get">GET</span> <span class="endpoint">/api/admin/stats</span> — Powers the charts on the admin dashboard.</li>
+<li><span class="method method-get">GET</span> <span class="endpoint">/api/admin/export/patients</span> — Generates a downloadable CSV of all patient records.</li>
+</ul>
+
+<h3>C. Patients (<code>patient_routes.py</code>)</h3>
+<p>Secured by the <code>@require_auth</code> decorator.</p>
+<ul>
+<li><span class="method method-get">GET</span> <span class="endpoint">/api/patients</span> — Retrieves the history of scans performed by the logged-in doctor.</li>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/patients/&lt;id&gt;/notes</span> — Adds clinical notes to a specific scan.</li>
+</ul>
+
+<h3>D. Analysis (<code>analysis_routes.py</code>)</h3>
+<p>The most complex route. Bridges the frontend to the ML Engine.</p>
+<ul>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/analysis/predict</span>
+<ol>
+<li>Receives the slide image from the frontend.</li>
+<li>Saves it temporarily to <code>uploads/slides/</code>.</li>
+<li>Sends an internal HTTP request to the ML Engine (<code>api_server.py</code> on Port 5001).</li>
+<li>Receives the prediction back from the ML Engine.</li>
+<li>Converts the image to a Base64 string.</li>
+<li>Saves the patient details, the prediction, and the Base64 image into the Neon PostgreSQL database.</li>
+<li>Returns the final result to the frontend.</li>
+</ol></li>
+</ul>
+
+<h3>E. Hospitals (<code>hospital_routes.py</code>)</h3>
+<ul>
+<li><span class="method method-get">GET</span> <span class="endpoint">/api/hospitals/search</span> — Queries the OpenStreetMap Nominatim API to provide autocomplete suggestions when doctors type their hospital name during registration.</li>
+</ul>
+
+<h2>3. Middleware Security (<code>auth_middleware.py</code>)</h2>
+<p>Most routes are protected by a decorator:</p>
+<pre><code>@require_auth
+def my_secure_route(current_user):
+    pass</code></pre>
+
+<p><strong>How it works:</strong></p>
+<ol>
+<li>The frontend sends a token in the HTTP Header: <code>Authorization: Bearer eyJhbGci...</code></li>
+<li>The middleware intercepts the request.</li>
+<li>It verifies the token using the secret key (<code>settings.JWT_SECRET_KEY</code>).</li>
+<li>It extracts the <code>user_id</code> from the token.</li>
+<li>If the token is fake or expired, it returns <code>401 Unauthorized</code>.</li>
+<li>If valid, it allows the request to proceed.</li>
+</ol>
+
+</body>
+</html>

@@ -212,7 +212,7 @@ const drawSignOff = (doc, startY, data) => {
     return y + dH + 3; // return final Y position
 };
 
-export const generatePatientPDF = async (patientRecord) => {
+export const generatePatientPDF = async (patientRecord, returnDoc = false) => {
     if (!patientRecord) {
         console.error('generatePatientPDF: No patientRecord provided');
         return;
@@ -701,8 +701,16 @@ export const generatePatientPDF = async (patientRecord) => {
 
         const safeName = patientName.replace(/\s+/g, '');
         const safeId = clinicalId.replace(/-/g, '');
-        doc.save(`CancerScan_${safeName}_${safeId}.pdf`);
+        const filename = `CancerScan_${safeName}_${safeId}.pdf`;
+        
+        if (returnDoc) {
+            return { doc, filename };
+        } else {
+            doc.save(filename);
+            return { success: true };
+        }
     } catch (error) {
         console.error("Critical error in generatePatientPDF:", error);
+        return null;
     }
 };

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10. Deployment Guide — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:10pt}
+thead th{background:#1e40af;color:#fff;padding:10px 14px;text-align:left;font-weight:600}
+tbody td{padding:9px 14px;border-bottom:1px solid #e2e8f0}
+tbody tr:nth-child(even){background:#f8fafc}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+<span class="doc-badge">CANCERSCAN DOCUMENTATION</span>
+
+<h1>10. Deployment Guide (Local vs Cloud)</h1>
+
+<p>CancerScan can be run in two different modes: completely offline on your local laptop, or fully deployed to the cloud for global access.</p>
+
+<h2>1. Local Development Mode</h2>
+<p>Running locally is useful when writing code or when you have no internet access.</p>
+<ol>
+<li><strong>Database:</strong> SQLite (Saved locally to <code>C:\Users\YourName\.cancerscan\cancerscan.db</code>)</li>
+<li><strong>Backend:</strong> Runs on <code>http://localhost:5099</code></li>
+<li><strong>ML Engine:</strong> Runs on <code>http://localhost:5001</code></li>
+<li><strong>Frontend:</strong> Runs as an Electron window pointing to localhost.</li>
+</ol>
+<p><strong>How to start local mode:</strong> Simply double-click the <strong><code>start_all.bat</code></strong> file in the project folder. It will open 3 terminal windows automatically.</p>
+
+<h2>2. Cloud Production Mode</h2>
+<p>This is how the application runs for the final presentation.</p>
+
+<table>
+<thead>
+<tr><th>Component</th><th>Cloud Provider</th><th>URL</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Landing Page</strong></td><td>Netlify</td><td><a href="https://cancerscan-ai.netlify.app/">https://cancerscan-ai.netlify.app/</a></td></tr>
+<tr><td><strong>Backend API</strong></td><td>Render</td><td><a href="https://dashboard.render.com/project/prj-d7q9l0q8qa3s73fs0kq0">Render Dashboard</a></td></tr>
+<tr><td><strong>ML Engine</strong></td><td>Render</td><td><em>(Runs on the exact same Render instance as the Backend)</em></td></tr>
+<tr><td><strong>Database</strong></td><td>Neon.tech</td><td><a href="https://console.neon.tech/app/projects/shy-salad-08176877">Neon Console</a></td></tr>
+<tr><td><strong>Frontend App</strong></td><td>GitHub Releases</td><td>Users download the <code>.exe</code> file to their laptops</td></tr>
+</tbody>
+</table>
+
+<h3>A. How Render Works (Backend + ML)</h3>
+<p>Render is linked directly to our GitHub repository. Whenever you <code>git push</code> to the <code>main</code> branch, Render automatically detects the changes and redeploys the server.</p>
+<ul>
+<li>Render looks at <code>Procfile</code> and sees the command: <code>web: bash start.sh</code></li>
+<li>Render executes <code>start.sh</code> which:
+<ol>
+<li>Runs <code>auto_seed.py</code> (creates the admin account in Neon).</li>
+<li>Starts <code>api_server.py</code> in the background (The ML Engine).</li>
+<li>Waits 5 seconds.</li>
+<li>Starts <code>gunicorn app:app</code> (The Main Flask Backend).</li>
+</ol></li>
+</ul>
+<p>Because both Python files run inside the same Render container, the backend can talk to the ML Engine locally, but the entire system is exposed to the internet via the <code>.onrender.com</code> URL.</p>
+
+<h3>B. Environment Variables on Render</h3>
+<p>For Render to connect to the Neon database, an Environment Variable must be set in the Render Dashboard.</p>
+<ul>
+<li><strong>Key:</strong> <code>DATABASE_URL</code></li>
+<li><strong>Value:</strong> <code>postgresql://neondb_owner:[PASSWORD]@ep-morning-sea-aoi12tm7-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require</code></li>
+</ul>
+<p>When <code>db.py</code> detects this variable, it automatically stops using local SQLite and switches to the live cloud database.</p>
+
+</body>
+</html>

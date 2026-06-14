@@ -2,6 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import * as XLSX from 'xlsx-js-style';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import {
     Download, Printer, FileText, ShieldAlert, Calendar, Search,
     ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Eye, Send,
@@ -112,38 +115,240 @@ export default function ReportsPage() {
         window.print();
     };
 
-    const handleExportZip = () => {
+    const handleExportZip = async () => {
         setShowExportMenu(false);
-        addToast(`Downloading ${filteredReports.length} clinical reports...`, 'info');
+        addToast(`Generating ZIP for ${filteredReports.length} clinical reports... Please wait.`, 'info');
 
-        filteredReports.forEach((report, index) => {
-            setTimeout(() => {
+        try {
+            const zip = new JSZip();
+            
+            for (let i = 0; i < filteredReports.length; i++) {
+                const report = filteredReports[i];
                 const fullRecord = patients.find(p => p.reportId === report.reportId);
-                generatePatientPDF(fullRecord || {
+                const recordToExport = fullRecord || {
                     ...report,
                     date: report.scanDate,
                     attendingPathologist: report.pathologist,
                     hospitalNetwork: report.hospital,
                     aiDiagnosis: report.diagnosis,
                     createdAt: report.generatedOn
-                });
-                if (index === filteredReports.length - 1) {
-                    addToast('All reports downloaded', 'success');
+                };
+                
+                const result = await generatePatientPDF(recordToExport, true);
+                if (result && result.doc) {
+                    const pdfBlob = result.doc.output('blob');
+                    zip.file(result.filename, pdfBlob);
                 }
-            }, index * 800);
-        });
+            }
+            
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            saveAs(zipBlob, 'CancerScan_Batch_Reports.zip');
+            addToast('ZIP file downloaded successfully', 'success');
+            
+        } catch (error) {
+            console.error('Error generating ZIP:', error);
+            addToast('Failed to generate ZIP file', 'error');
+        }
     };
 
-    const handleExportCSV = () => {
+    const handleExportExcel = () => {
         setShowExportMenu(false);
-        const header = "Report ID,Patient Name,Scan Date,Diagnosis,Category,Subtype,Subtype Conf,Survival Prob,Est. Survival (Months),Risk Category,Pathologist,Generated On\n";
-        const body = filteredReports.map(r =>
-            `${r.reportId},"${r.patientName}",${r.scanDate.split('-').reverse().join('/')},"${r.diagnosis}","${r.category}","${r.subtype || ''}","${r.subtype_confidence ? r.subtype_confidence + '%' : ''}","${r.survival_probability ? r.survival_probability + '%' : ''}","${r.survival_months || ''}","${r.risk_category || ''}","${r.pathologist}","${formatTime(r.generatedOn)}"`
-        ).join("\n");
-        const uri = encodeURI("data:text/csv;charset=utf-8," + header + body);
-        const link = document.createElement("a");
-        link.href = uri; link.download = "reports_summary.csv";
-        document.body.appendChild(link); link.click(); link.remove();
+        const wb = XLSX.utils.book_new();
+        const ws = {};
+
+        // Columns: A to L (12 columns)
+        const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+        const colCount = cols.length;
+
+        // Stats
+        const totalRecs = filteredReports.length;
+        const cancerCount = filteredReports.filter(r => r.diagnosis === 'Cancer Detected').length;
+        const benignCount = filteredReports.filter(r => r.diagnosis === 'Benign').length;
+        const cancerPct = totalRecs > 0 ? Math.round(cancerCount / totalRecs * 100) : 0;
+        const benignPct = totalRecs > 0 ? Math.round(benignCount / totalRecs * 100) : 0;
+
+        const thinBorder = {
+            top: { style: 'thin', color: { rgb: 'CCCCCC' } },
+            bottom: { style: 'thin', color: { rgb: 'CCCCCC' } },
+            left: { style: 'thin', color: { rgb: 'CCCCCC' } },
+            right: { style: 'thin', color: { rgb: 'CCCCCC' } }
+        };
+
+        // ROW 1: Title
+        ws['A1'] = {
+            v: 'CANCERSCAN \u2014 DIAGNOSTIC REPORTS SUMMARY', t: 's',
+            s: {
+                font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' } },
+                fill: { fgColor: { rgb: '0d4f3c' } },
+                alignment: { horizontal: 'center', vertical: 'center' }
+            }
+        };
+        for (let c = 1; c < colCount; c++) {
+            ws[cols[c] + '1'] = { v: '', t: 's', s: { fill: { fgColor: { rgb: '0d4f3c' } }, alignment: { horizontal: 'center', vertical: 'center' } } };
+        }
+
+        // ROW 2: Metadata
+        const now = new Date();
+        const metaText = `Generated On: ${now.toLocaleDateString('en-GB')} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}   |   System: CancerScan AI`;
+        ws['A2'] = {
+            v: metaText, t: 's',
+            s: { font: { sz: 10, color: { rgb: '8b949e' } }, fill: { fgColor: { rgb: '1a2f26' } }, alignment: { horizontal: 'center', vertical: 'center' } }
+        };
+        for (let c = 1; c < colCount; c++) {
+            ws[cols[c] + '2'] = { v: '', t: 's', s: { fill: { fgColor: { rgb: '1a2f26' } }, alignment: { horizontal: 'center', vertical: 'center' } } };
+        }
+
+        // ROW 3: Spacer
+        ws['A3'] = { v: '', t: 's', s: {} };
+
+        // ROW 4: Summary Statistics
+        const summaryStyle = (color) => ({
+            font: { bold: true, sz: 10, color: { rgb: color } }, fill: { fgColor: { rgb: 'f0f7f4' } }, border: thinBorder, alignment: { horizontal: 'center', vertical: 'center' }
+        });
+        const cancerColor = cancerCount === 0 ? '9e9e9e' : 'c0392b';
+        const benignColor = benignCount === 0 ? '9e9e9e' : '1e8449';
+
+        ws['A4'] = { v: `TOTAL REPORTS: ${totalRecs}`, t: 's', s: summaryStyle('1a1a1a') };
+        ws['B4'] = { v: `CANCER DETECTED: ${cancerCount} (${cancerPct}%)`, t: 's', s: summaryStyle(cancerColor) };
+        ws['C4'] = { v: ' ', t: 's', s: summaryStyle(cancerColor) };
+        ws['D4'] = { v: `BENIGN: ${benignCount} (${benignPct}%)`, t: 's', s: summaryStyle(benignColor) };
+        ws['E4'] = { v: ' ', t: 's', s: summaryStyle(benignColor) };
+        // fill rest
+        for (let c = 5; c < colCount; c++) {
+            ws[cols[c] + '4'] = { v: ' ', t: 's', s: summaryStyle('1a1a1a') };
+        }
+
+        // ROW 5: Spacer
+        ws['A5'] = { v: '', t: 's', s: {} };
+
+        // ROW 6: Column Headers
+        const headers = ['REPORT ID', 'PATIENT NAME', 'SCAN DATE', 'DIAGNOSIS', 'CATEGORY', 'SUBTYPE', 'SUBTYPE CONFIDENCE (%)', 'SURVIVAL PROBABILITY (%)', 'EST. SURVIVAL (MONTHS)', 'RISK CATEGORY', 'PATHOLOGIST', 'GENERATED ON'];
+        const headerTopBorder = { style: 'medium', color: { rgb: '1a3a2a' } };
+        headers.forEach((h, i) => {
+            let leftBorder = i === 0 ? { style: 'medium', color: { rgb: '1a3a2a' } } : thinBorder.left;
+            let rightBorder = i === colCount - 1 ? { style: 'thin', color: { rgb: '1a3a2a' } } : thinBorder.right;
+            ws[cols[i] + '6'] = {
+                v: h, t: 's',
+                s: {
+                    font: { bold: true, sz: 11, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1a3a2a' } }, alignment: { horizontal: 'center', vertical: 'center' },
+                    border: { top: headerTopBorder, bottom: thinBorder.bottom, left: leftBorder, right: rightBorder }
+                }
+            };
+        });
+
+        // ROW 7+: Data Rows
+        filteredReports.forEach((r, idx) => {
+            const rowNum = 7 + idx;
+            const isEven = idx % 2 === 1;
+            const rowBg = isEven ? 'f2f9f6' : 'ffffff';
+            const isLastRow = idx === filteredReports.length - 1;
+
+            const getBorder = (colIndex) => ({
+                top: thinBorder.top, bottom: isLastRow ? { style: 'medium', color: { rgb: '1a3a2a' } } : thinBorder.bottom,
+                left: colIndex === 0 ? { style: 'medium', color: { rgb: '1a3a2a' } } : thinBorder.left, right: colIndex === colCount - 1 ? { style: 'thin', color: { rgb: '1a3a2a' } } : thinBorder.right
+            });
+
+            const baseStyle = (colIndex, overrides = {}) => ({
+                font: { sz: 10, color: { rgb: overrides.fontColor || '1a1a1a' }, bold: overrides.bold || false },
+                fill: { fgColor: { rgb: overrides.bg || rowBg } }, alignment: { horizontal: overrides.align || 'center', vertical: 'center', wrapText: overrides.wrap || false },
+                border: getBorder(colIndex)
+            });
+
+            // A: Report ID
+            ws[`A${rowNum}`] = { v: r.reportId, t: 's', s: baseStyle(0, { fontColor: '0a7c5c', bold: true }) };
+            // B: Patient Name
+            ws[`B${rowNum}`] = { v: r.patientName, t: 's', s: baseStyle(1, { align: 'left', bold: true }) };
+            // C: Scan Date
+            ws[`C${rowNum}`] = { v: r.scanDate ? r.scanDate.split('-').reverse().join('/') : '-', t: 's', s: baseStyle(2) };
+            
+            // D: Diagnosis
+            let diagColor = '1a1a1a', diagBg = 'fefefe';
+            if (r.diagnosis === 'Cancer Detected') { diagColor = 'c0392b'; diagBg = 'fdf2f2'; }
+            else if (r.diagnosis === 'Benign') { diagColor = '1e8449'; diagBg = 'f2fdf5'; }
+            ws[`D${rowNum}`] = { v: r.diagnosis, t: 's', s: baseStyle(3, { bold: true, fontColor: diagColor, bg: diagBg }) };
+            ws[`D${rowNum}`].s.font.sz = 11;
+
+            // E: Category
+            ws[`E${rowNum}`] = { v: r.category, t: 's', s: baseStyle(4) };
+
+            // F: Subtype
+            let subtypeColor = '1a1a1a';
+            const subtypeVal = r.subtype || '';
+            if (subtypeVal.includes('SCC')) { subtypeColor = '7c3aed'; }
+            else if (subtypeVal.includes('ACA') || subtypeVal.includes('Adeno')) { subtypeColor = '0369a1'; }
+            ws[`F${rowNum}`] = { v: subtypeVal, t: 's', s: baseStyle(5, { fontColor: subtypeColor, bold: subtypeVal !== '' }) };
+
+            // G: Subtype Conf
+            ws[`G${rowNum}`] = { v: r.subtype_confidence ? r.subtype_confidence + '%' : '', t: 's', s: baseStyle(6) };
+            
+            // H: Survival Prob
+            ws[`H${rowNum}`] = { v: r.survival_probability ? r.survival_probability + '%' : '', t: 's', s: baseStyle(7) };
+
+            // I: Est Survival Months
+            ws[`I${rowNum}`] = { v: r.survival_months ? String(r.survival_months) : '', t: 's', s: baseStyle(8) };
+
+            // J: Risk Category
+            let riskColor = '1a1a1a';
+            if (r.risk_category === 'High') riskColor = 'dc2626';
+            else if (r.risk_category === 'Moderate') riskColor = 'd97706';
+            else if (r.risk_category === 'Low') riskColor = '16a34a';
+            ws[`J${rowNum}`] = { v: r.risk_category || '', t: 's', s: baseStyle(9, { fontColor: riskColor, bold: r.risk_category !== '' }) };
+
+            // K: Pathologist
+            ws[`K${rowNum}`] = { v: r.pathologist, t: 's', s: baseStyle(10) };
+
+            // L: Generated On
+            ws[`L${rowNum}`] = { v: formatTime(r.generatedOn), t: 's', s: baseStyle(11) };
+        });
+
+        // FOOTER ROW
+        const footerRowNum = 7 + filteredReports.length + 1;
+        const footerText = 'CONFIDENTIAL \u2014 FOR CLINICAL USE ONLY  |  CancerScan AI Powered Lung Cancer Detection System  |  This report is generated automatically and must be verified by a licensed pathologist before clinical use.';
+        ws[`A${footerRowNum}`] = {
+            v: footerText, t: 's',
+            s: { font: { sz: 9, italic: true, color: { rgb: '4a4a4a' } }, fill: { fgColor: { rgb: 'f8f9fa' } }, alignment: { horizontal: 'center', vertical: 'center', wrapText: true }, border: { top: { style: 'medium', color: { rgb: '7f8c8d' } } } }
+        };
+        for (let c = 1; c < colCount; c++) {
+            ws[cols[c] + footerRowNum] = { v: '', t: 's', s: { fill: { fgColor: { rgb: 'f8f9fa' } }, alignment: { horizontal: 'center', vertical: 'center' }, border: { top: { style: 'medium', color: { rgb: '7f8c8d' } } } } };
+        }
+
+        // MERGES
+        ws['!merges'] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }, // Row 1
+            { s: { r: 1, c: 0 }, e: { r: 1, c: 11 } }, // Row 2
+            { s: { r: 3, c: 1 }, e: { r: 3, c: 2 } }, // B4:C4 (Cancer Detected)
+            { s: { r: 3, c: 3 }, e: { r: 3, c: 4 } }, // D4:E4 (Benign)
+            { s: { r: 3, c: 5 }, e: { r: 3, c: 11 } }, // F4:L4 (Blank filler)
+            { s: { r: footerRowNum - 1, c: 0 }, e: { r: footerRowNum - 1, c: 11 } }, // Footer
+        ];
+
+        // COLS
+        ws['!cols'] = [
+            { wch: 18 },  // A: Report ID
+            { wch: 22 },  // B: Patient Name
+            { wch: 14 },  // C: Scan Date
+            { wch: 18 },  // D: Diagnosis
+            { wch: 16 },  // E: Category
+            { wch: 25 },  // F: Subtype
+            { wch: 25 },  // G: Subtype Conf
+            { wch: 25 },  // H: Survival Prob
+            { wch: 24 },  // I: Est Survival
+            { wch: 15 },  // J: Risk Category
+            { wch: 22 },  // K: Pathologist
+            { wch: 20 },  // L: Generated On
+        ];
+
+        // ROWS
+        ws['!rows'] = [{ hpt: 35 }, { hpt: 22 }, { hpt: 4 }, { hpt: 22 }, { hpt: 6 }, { hpt: 28 }];
+        for (let i = 0; i < filteredReports.length; i++) ws['!rows'].push({ hpt: 22 });
+        ws['!rows'].push({ hpt: 8 }); ws['!rows'].push({ hpt: 30 });
+
+        // REF
+        ws['!ref'] = `A1:L${footerRowNum}`;
+        ws['!freeze'] = { xSplit: 0, ySplit: 6 };
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Diagnostic Reports');
+        XLSX.writeFile(wb, 'reports_summary.xlsx');
     };
 
     const downloadSinglePDF = (e, report) => {
@@ -246,7 +451,7 @@ export default function ReportsPage() {
                         {showExportMenu && (
                             <div className="absolute right-0 top-12 w-56 bg-[color:var(--bg-surface)] border border-[color:var(--border-subtle)] rounded-md shadow-xl py-1 z-20">
                                 <button onClick={handleExportZip} className="w-full text-left px-4 py-2 text-sm text-[color:var(--text-primary)] hover:bg-[color:var(--bg-surface-alt)] transition-colors">Export All as ZIP (PDF files)</button>
-                                <button onClick={handleExportCSV} className="w-full text-left px-4 py-2 text-sm text-[color:var(--text-primary)] hover:bg-[color:var(--bg-surface-alt)] transition-colors">Export Summary as CSV</button>
+                                <button onClick={handleExportExcel} className="w-full text-left px-4 py-2 text-sm text-[color:var(--text-primary)] hover:bg-[color:var(--bg-surface-alt)] transition-colors">Export Summary as Excel</button>
                             </div>
                         )}
                     </div>

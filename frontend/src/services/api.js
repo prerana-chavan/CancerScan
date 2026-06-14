@@ -14,7 +14,7 @@ api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('cancerscan_token');
         console.log('[INTERCEPTOR] running, token:', token ? `FOUND (len: ${token.length}, start: ${token.substring(0, 10)}...)` : 'MISSING');
-        
+
         // Prevent sending "undefined" or "null" strings
         if (token && token !== 'undefined' && token !== 'null') {
             config.headers['Authorization'] = `Bearer ${token}`;
@@ -22,7 +22,7 @@ api.interceptors.request.use(
         } else {
             console.log('[INTERCEPTOR] Token invalid or missing, skipping header');
         }
-        
+
         console.log('[INTERCEPTOR] Requesting URL:', config.url);
         return config;
     },
@@ -86,7 +86,11 @@ export const createPatient = async (patientData) => {
     return res.data;
 };
 
-// Removed deletePatient and deleteAllPatients
+// Removed actual delete routes per security policy
+export const deletePatient = async (id) => {
+    // Stub to prevent frontend crashes, intentionally throws to trigger the "Action Blocked" UI notification
+    throw new Error('Delete action blocked per security policy. Node permissions required.');
+};
 
 export const updatePatientStatus = async (patientId, status) => {
     const res = await api.patch(`/patients/${patientId}/status`, { reviewStatus: status });

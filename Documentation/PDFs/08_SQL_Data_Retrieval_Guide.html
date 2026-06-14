@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>08. SQL Data Retrieval Guide — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+.warn-box{border-left:4px solid #f59e0b;margin:18px 0;padding:14px 22px;background:#fffbeb;border-radius:0 10px 10px 0;color:#92400e}
+.warn-box::before{content:"⚠️ WARNING";font-weight:700;display:block;margin-bottom:6px}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+<span class="doc-badge">CANCERSCAN DOCUMENTATION</span>
+
+<h1>08. SQL Data Retrieval Guide</h1>
+
+<p>If your examiners ask you to demonstrate SQL queries directly on the database during your Viva, you can open the <strong>Query Tool</strong> in pgAdmin4 and run these exact queries.</p>
+
+<blockquote>
+<strong>To open the Query Tool:</strong> In pgAdmin4, right-click the <code>neondb</code> database and select <strong>Query Tool</strong>. Paste the code and press <strong>F5</strong> (or click the Play button) to execute.
+</blockquote>
+
+<h2>1. Doctors Queries</h2>
+
+<p><strong>View all registered doctors:</strong></p>
+<pre><code>SELECT id, full_name, email, role, hospital, is_approved 
+FROM doctors 
+ORDER BY id ASC;</code></pre>
+
+<p><strong>View doctors waiting for admin approval:</strong></p>
+<pre><code>SELECT full_name, email, medical_license_id 
+FROM doctors 
+WHERE is_approved = 0 AND role = 'doctor';</code></pre>
+
+<p><strong>Count how many doctors are from each hospital:</strong></p>
+<pre><code>SELECT hospital, COUNT(*) as doctor_count 
+FROM doctors 
+GROUP BY hospital 
+ORDER BY doctor_count DESC;</code></pre>
+
+<h2>2. Patients & Scans Queries</h2>
+
+<p><strong>View all patient scans (Hide the massive Base64 image column):</strong></p>
+<pre><code>SELECT id, patient_name, age, gender, prediction_result, subtype, scan_date 
+FROM patients 
+ORDER BY scan_date DESC;</code></pre>
+
+<p><strong>Find a specific patient by name (e.g., "John"):</strong></p>
+<pre><code>SELECT * FROM patients 
+WHERE patient_name ILIKE '%john%';</code></pre>
+
+<p><strong>Count the total number of scans grouped by ML result:</strong></p>
+<pre><code>SELECT prediction_result, COUNT(*) as total_cases 
+FROM patients 
+GROUP BY prediction_result;</code></pre>
+
+<p><strong>Count cases by specific cancer subtype:</strong></p>
+<pre><code>SELECT subtype, COUNT(*) as subtype_count 
+FROM patients 
+WHERE subtype != 'Normal / Benign Lung Tissue'
+GROUP BY subtype;</code></pre>
+
+<p><strong>View all High-Risk patients (Survival &lt; 40%):</strong></p>
+<pre><code>SELECT patient_name, age, subtype, survival_probability 
+FROM patients 
+WHERE CAST(survival_probability AS FLOAT) &lt; 0.40;</code></pre>
+
+<h2>3. Audit Log Queries</h2>
+
+<p><strong>View the last 10 security events in the system:</strong></p>
+<pre><code>SELECT timestamp, actor_name, action, detail, ip_address 
+FROM audit_logs 
+ORDER BY timestamp DESC 
+LIMIT 10;</code></pre>
+
+<p><strong>Find all logins from a specific doctor (using their ID):</strong></p>
+<pre><code>SELECT timestamp, action, detail 
+FROM audit_logs 
+WHERE actor_id = '1' AND action = 'Login'
+ORDER BY timestamp DESC;</code></pre>
+
+<h2>4. Emergency Fixes (Updates & Deletes)</h2>
+
+<p><strong>Manually approve a doctor without using the Admin panel:</strong></p>
+<pre><code>UPDATE doctors 
+SET is_approved = 1 
+WHERE email = 'demo@cancerscan.app';</code></pre>
+
+<p><strong>Delete a specific test patient record (if you messed up a demo):</strong></p>
+<pre><code>DELETE FROM patients 
+WHERE id = 5;</code></pre>
+
+<div class="warn-box">
+Be very careful with <code>UPDATE</code> and <code>DELETE</code> commands. Always use a <code>WHERE</code> clause, otherwise you will modify/delete every row in the entire table!
+</div>
+
+</body>
+</html>

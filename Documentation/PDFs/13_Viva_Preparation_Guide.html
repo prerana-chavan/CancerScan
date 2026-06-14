@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13. Viva Preparation Guide — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+.qa-question{background:linear-gradient(135deg,#eff6ff,#f0f9ff);padding:14px 20px;border-radius:10px;margin-top:18px;margin-bottom:8px;border-left:4px solid #3b82f6;font-weight:600;color:#1e40af}
+.qa-answer{padding:6px 20px 14px 20px;margin-bottom:12px;color:#334155}
+.qa-answer::before{content:"💬 Answer: ";font-weight:700;color:#0f172a}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+<span class="doc-badge">CANCERSCAN DOCUMENTATION</span>
+
+<h1>13. Viva Preparation Guide</h1>
+
+<p>This document contains expected questions from external examiners during your final project Viva, along with professional answers.</p>
+
+<h2>Section 1: Architecture & Design</h2>
+
+<div class="qa-question">Q1: Why did you build this as an Electron Desktop App instead of a normal website?</div>
+<div class="qa-answer">"Medical data is highly sensitive. By building a desktop application, we ensure the interface feels native and secure for doctors. Furthermore, in the future, a desktop app allows us to process heavy image normalization locally on the doctor's GPU, reducing server costs, rather than uploading massive raw histopathology slides over a slow hospital network."</div>
+
+<div class="qa-question">Q2: What is the difference between your Main Backend and your ML Engine? Why use two different ports?</div>
+<div class="qa-answer">"We adopted a microservices architecture. The Main Backend (Port 5099) handles user authentication, JWT tokens, and database CRUD operations. The ML Engine (Port 5001) is strictly responsible for TensorFlow inference. By decoupling them, we prevent the heavy ML processing from blocking or slowing down routine database queries. It also allows us to scale them independently in the cloud."</div>
+
+<div class="qa-question">Q3: How are you managing the database in the cloud?</div>
+<div class="qa-answer">"We use PostgreSQL hosted on Neon.tech. Neon is a serverless database that separates compute and storage, making it incredibly fast and scalable. Our backend connects to it via a <code>DATABASE_URL</code> environment variable configured on Render."</div>
+
+<h2>Section 2: Artificial Intelligence & Machine Learning</h2>
+
+<div class="qa-question">Q4: What is the purpose of Macenko Normalization in your pipeline?</div>
+<div class="qa-answer">"Histopathology slides are stained using Hematoxylin and Eosin (H&E). However, different hospitals use different concentrations of dye, resulting in inconsistent colors. Macenko normalization mathematically isolates the stain vectors and standardizes the color profile. This prevents our CNN from learning 'color biases' and forces it to focus purely on cellular structure."</div>
+
+<div class="qa-question">Q5: What happens if a user uploads a picture of a car instead of a medical slide?</div>
+<div class="qa-answer">"We implemented an 'H&E Gatekeeper' algorithm before the ML inference phase. It analyzes the RGB pixel distribution of the uploaded image. If it doesn't detect the specific biological pink and purple signatures of H&E tissue, it rejects the image with a 422 Error, saving server RAM and preventing junk data from entering our database."</div>
+
+<div class="qa-question">Q6: Why did you use TensorFlow-CPU on Render instead of full TensorFlow?</div>
+<div class="qa-answer">"Render's free tier provides CPU-only containers with 512MB of RAM. The full <code>tensorflow</code> package includes CUDA and cuDNN libraries for GPU processing, which are useless on Render and consume an extra 80MB of RAM. By explicitly using <code>tensorflow-cpu</code>, we optimized our RAM footprint and prevented Out-Of-Memory (OOM) crashes."</div>
+
+<h2>Section 3: Security & Database</h2>
+
+<div class="qa-question">Q7: How are passwords secured in your database?</div>
+<div class="qa-answer">"We never store plain-text passwords. We use the <code>bcrypt</code> algorithm with salt to hash the passwords 12 times. Even if our Neon database was compromised, the passwords cannot be reverse-engineered."</div>
+
+<div class="qa-question">Q8: What is a JWT and how do you use it?</div>
+<div class="qa-answer">"JSON Web Tokens (JWT) allow stateless authentication. When a doctor logs in, the backend signs a token containing their User ID and Role. The frontend stores this token and attaches it to every API request header. Our Python middleware validates the cryptographic signature of the token before allowing access to protected routes like <code>/api/patients</code>."</div>
+
+<div class="qa-question">Q9: If I look at your database, how are the medical images stored?</div>
+<div class="qa-answer">"Instead of setting up a complex AWS S3 bucket, we convert the slide images into Base64 encoded strings and store them directly in a <code>TEXT</code> column in the PostgreSQL database. Since the images are resized to 500px before saving, each image only takes about 75KB, making this a highly efficient and self-contained storage method for our academic project scope."</div>
+
+</body>
+</html>

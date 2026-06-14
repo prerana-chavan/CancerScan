@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15. Master Combined Documentation — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px;page-break-before:always}
+h1:first-of-type{page-break-before:avoid}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:10pt}
+thead th{background:#1e40af;color:#fff;padding:10px 14px;text-align:left;font-weight:600}
+tbody td{padding:9px 14px;border-bottom:1px solid #e2e8f0}
+tbody tr:nth-child(even){background:#f8fafc}
+.tip-box{border-left:4px solid #10b981;margin:18px 0;padding:14px 22px;background:#ecfdf5;border-radius:0 10px 10px 0;color:#065f46}
+.tip-box::before{content:"💡 TIP";font-weight:700;display:block;margin-bottom:6px}
+.warn-box{border-left:4px solid #f59e0b;margin:18px 0;padding:14px 22px;background:#fffbeb;border-radius:0 10px 10px 0;color:#92400e}
+.warn-box::before{content:"⚠️ WARNING";font-weight:700;display:block;margin-bottom:6px}
+.caution-box{border-left:4px solid #ef4444;margin:18px 0;padding:14px 22px;background:#fef2f2;border-radius:0 10px 10px 0;color:#991b1b}
+.caution-box::before{content:"⚠️ CAUTION";font-weight:700;display:block;margin-bottom:6px}
+.important-box{border-left:4px solid #8b5cf6;margin:18px 0;padding:14px 22px;background:#f5f3ff;border-radius:0 10px 10px 0;color:#5b21b6}
+.important-box::before{content:"⚡ IMPORTANT";font-weight:700;display:block;margin-bottom:6px}
+.endpoint{display:inline-block;background:#1e293b;color:#10b981;padding:3px 10px;border-radius:6px;font-family:'Fira Code',monospace;font-size:9.5pt;margin:2px 0}
+.method{display:inline-block;padding:2px 8px;border-radius:4px;font-size:8.5pt;font-weight:700;font-family:'Fira Code',monospace;margin-right:6px}
+.method-get{background:#dbeafe;color:#1d4ed8}
+.method-post{background:#dcfce7;color:#166534}
+.qa-question{background:linear-gradient(135deg,#eff6ff,#f0f9ff);padding:14px 20px;border-radius:10px;margin-top:18px;margin-bottom:8px;border-left:4px solid #3b82f6;font-weight:600;color:#1e40af}
+.qa-answer{padding:6px 20px 14px 20px;margin-bottom:12px;color:#334155}
+.qa-answer::before{content:"💬 Answer: ";font-weight:700;color:#0f172a}
+.arch-diagram{background:linear-gradient(135deg,#f8fafc,#f1f5f9);border:2px solid #e2e8f0;border-radius:16px;padding:30px;margin:24px 0;text-align:center}
+.arch-layer{margin:16px 0;padding:16px;border-radius:12px;color:white}
+.layer-public{background:linear-gradient(135deg,#64748b,#475569)}
+.layer-client{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+.layer-server{background:linear-gradient(135deg,#10b981,#059669)}
+.layer-db{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.layer-title{font-weight:700;font-size:12pt;margin-bottom:6px}
+.layer-detail{font-size:10pt;opacity:0.9}
+.arrow{color:#94a3b8;font-size:20pt;margin:4px 0;display:block}
+.cover-page{text-align:center;padding:120px 40px;page-break-after:always}
+.cover-page h1{font-size:36pt;border:none;color:#0f172a;margin-bottom:15px;page-break-before:avoid}
+.cover-page .subtitle{font-size:14pt;color:#475569;margin-bottom:40px}
+.cover-page .team{font-size:11pt;color:#64748b;line-height:2}
+.cover-page .badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:10px 30px;border-radius:30px;font-size:12pt;font-weight:700;margin-bottom:30px}
+.toc{page-break-after:always;padding:40px 0}
+.toc h2{text-align:center;color:#0f172a;font-size:20pt;border:none}
+.toc ol{font-size:12pt;line-height:2.5;max-width:500px;margin:30px auto}
+.toc a{color:#1e40af;text-decoration:none;border-bottom:1px dashed #93c5fd}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm;@bottom-center{content:"CancerScan Documentation"}@bottom-right{content:"Page " counter(page)}}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF (All Pages)</button>
+
+<!-- COVER PAGE -->
+<div class="cover-page">
+<div class="badge">🔬 CANCERSCAN</div>
+<h1>CancerScan</h1>
+<div class="subtitle">Lung Cancer Detection, Subtype Classification and Survival Analysis Using Deep Learning</div>
+<hr>
+<div class="team">
+<strong>Team Members:</strong><br>
+Prerana Chavan (Team Leader)<br>
+Akshada Aware<br>
+Dipti Berad<br>
+Sakshi Yemul<br><br>
+<strong>Dr. Vithalrao Vikhe Patil College of Engineering, Ahilyanagar</strong><br>
+Savitribai Phule Pune University<br>
+Department of Computer Engineering<br>
+Academic Year 2025-2026
+</div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#sec1">Project Overview</a></li>
+<li><a href="#sec2">Folder Structure</a></li>
+<li><a href="#sec3">Frontend & Electron Guide</a></li>
+<li><a href="#sec4">Backend API Documentation</a></li>
+<li><a href="#sec5">ML Engine Documentation</a></li>
+<li><a href="#sec6">Database Schema Guide</a></li>
+<li><a href="#sec7">pgAdmin4 Management Guide</a></li>
+<li><a href="#sec8">SQL Data Retrieval Guide</a></li>
+<li><a href="#sec9">Authentication & Security Guide</a></li>
+<li><a href="#sec10">Deployment Guide</a></li>
+<li><a href="#sec11">GitHub Release Guide</a></li>
+<li><a href="#sec12">Team Onboarding Guide</a></li>
+<li><a href="#sec13">Viva Preparation Guide</a></li>
+<li><a href="#sec14">System Architecture Guide</a></li>
+</ol>
+</div>
+
+<!-- ===================== SECTION 1 ===================== -->
+<h1 id="sec1">01. Project Overview</h1>
+
+<h2>1. Project Identity</h2>
+<ul>
+<li><strong>Project Name:</strong> CancerScan</li>
+<li><strong>Full Title:</strong> CancerScan: Lung Cancer Detection, Subtype Classification and Survival Analysis Using Deep Learning</li>
+<li><strong>Academic Year:</strong> 2025-2026</li>
+<li><strong>College:</strong> Dr. Vithalrao Vikhe Patil College of Engineering, Ahilyanagar</li>
+<li><strong>University:</strong> Savitribai Phule Pune University</li>
+<li><strong>Department:</strong> Computer Engineering (CE)</li>
+</ul>
+
+<h2>2. Team Members</h2>
+<ul>
+<li><strong>Prerana Chavan</strong> (Team Leader)</li>
+<li><strong>Akshada Aware</strong></li>
+<li><strong>Dipti Berad</strong></li>
+<li><strong>Sakshi Yemul</strong></li>
+</ul>
+
+<h2>3. Abstract</h2>
+<p>CancerScan is an AI-powered medical diagnostic tool designed to assist pathologists in analyzing lung tissue biopsy slides (Histopathology / H&E stained slides). The system uses a Deep Learning Convolutional Neural Network (CNN) to detect lung cancer and classify it into its specific subtypes (Adenocarcinoma vs. Squamous Cell Carcinoma). By automating the initial screening process, CancerScan reduces diagnostic time and provides a second layer of validation for medical professionals.</p>
+
+<h2>4. Problem Statement</h2>
+<p>Manual analysis of lung histopathology slides under a microscope is time-consuming, prone to human error, and suffers from inter-observer variability. Distinguishing between closely related lung cancer subtypes requires highly specialized expertise. There is a need for an automated, accessible, and highly accurate AI system to support pathologists in rural or understaffed hospitals.</p>
+
+<h2>5. Core Features</h2>
+<ol>
+<li><strong>Desktop Application:</strong> Secure, native desktop experience for doctors built with Electron and React.</li>
+<li><strong>AI Inference:</strong> 3-class classification model using a custom MobileNet/CNN architecture.</li>
+<li><strong>Automated Normalization:</strong> Macenko stain normalization standardizes slide colors before AI processing.</li>
+<li><strong>H&E Gatekeeper:</strong> Prevents upload of non-medical images using pixel-level color validation.</li>
+<li><strong>Secure Authentication:</strong> JWT-based login with bcrypt password hashing and RBAC.</li>
+<li><strong>Report Generation:</strong> Automatic generation of downloadable PDF medical reports.</li>
+<li><strong>Cloud Infrastructure:</strong> Global accessibility powered by Render and Neon.</li>
+</ol>
+
+<h2>6. Official Links</h2>
+<ul>
+<li><strong>Landing Page:</strong> <a href="https://cancerscan-ai.netlify.app/">https://cancerscan-ai.netlify.app/</a></li>
+<li><strong>GitHub Repository:</strong> <a href="https://github.com/prerana-chavan/CancerScan">https://github.com/prerana-chavan/CancerScan</a></li>
+</ul>
+
+<hr>
+
+<!-- ===================== SECTION 2 ===================== -->
+<h1 id="sec2">02. Folder Structure</h1>
+
+<p>The CancerScan repository is divided into two primary directories: <code>frontend</code> and <code>backend</code>.</p>
+
+<h2>1. High-Level Architecture</h2>
+<pre><code>CancerScan/
+├── frontend/               # React + Electron Desktop App
+│   ├── src/                # UI Components and API logic
+│   ├── electron/           # Desktop packaging scripts
+│   └── package.json        # Node.js dependencies
+├── backend/                # Flask API + TensorFlow ML Engine
+│   ├── routes/             # API Endpoints
+│   ├── database/           # PostgreSQL/SQLite connection logic
+│   ├── models_lcscnet_full/# Saved .h5 TensorFlow models
+│   ├── app.py              # Main Flask Entry Point
+│   └── api_server.py       # ML Engine Entry Point
+├── Documentation/          # Project documentation files
+├── start_all.bat           # Local development launch script
+└── LOCAL_SETUP_GUIDE.md    # Instructions for running offline</code></pre>
+
+<h2>2. Key Files to Know</h2>
+<ol>
+<li><strong><code>frontend/src/config/api.js</code></strong>: Tells the frontend whether to talk to Render or localhost.</li>
+<li><strong><code>backend/start.sh</code></strong>: Tells Render how to start the app in the cloud.</li>
+<li><strong><code>backend/database/db.py</code></strong>: Decides whether to use local SQLite or Neon PostgreSQL.</li>
+</ol>
+
+<hr>
+
+<!-- ===================== SECTION 3 ===================== -->
+<h1 id="sec3">03. Frontend & Electron Guide</h1>
+
+<p>CancerScan's frontend is built using <strong>React 18</strong> and <strong>Vite</strong>, wrapped into a native Windows Desktop Application using <strong>Electron 28</strong>.</p>
+
+<h2>1. Tech Stack</h2>
+<ul>
+<li><strong>UI Framework:</strong> React 18</li>
+<li><strong>Build Tool:</strong> Vite 5</li>
+<li><strong>Desktop Wrapper:</strong> Electron 28</li>
+<li><strong>Styling:</strong> Tailwind CSS 4</li>
+<li><strong>Routing:</strong> React Router v6</li>
+<li><strong>HTTP Client:</strong> Axios</li>
+<li><strong>Charts:</strong> Recharts</li>
+</ul>
+
+<h2>2. API Connection Logic</h2>
+<pre><code>const isAsarPackaged = window.location.href.includes('app.asar');
+const isPackagedExe = (window.electronAPI && window.electronAPI.isPackaged) || isAsarPackaged;
+const useProductionBackend = isPackagedExe;
+
+const BASE_URL = useProductionBackend ? 'https://cancerscan.onrender.com' : 'http://localhost:5099';
+const ML_URL   = useProductionBackend ? 'https://cancerscan.onrender.com' : 'http://localhost:5001';</code></pre>
+
+<h2>3. Packaging the .exe</h2>
+<ol>
+<li>Open Command Prompt in the <code>frontend</code> folder.</li>
+<li>Run <code>npm run package</code></li>
+<li>Output: <code>frontend/dist-electron/CancerScan Setup 1.0.0.exe</code></li>
+</ol>
+
+<hr>
+
+<!-- ===================== SECTION 4 ===================== -->
+<h1 id="sec4">04. Backend API Documentation</h1>
+
+<p>The main backend server is built using <strong>Python</strong> and <strong>Flask</strong>, running on <strong>Port 5099</strong>.</p>
+
+<h2>API Route Blueprints</h2>
+<h3>A. Authentication (<code>auth_routes.py</code>)</h3>
+<ul>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/auth/register</span> — Creates a new doctor account</li>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/auth/login</span> — Verifies password, returns JWT token</li>
+</ul>
+
+<h3>B. Admin Panel (<code>admin_routes.py</code>)</h3>
+<ul>
+<li><span class="method method-get">GET</span> <span class="endpoint">/api/admin/doctors/pending</span> — Lists pending doctors</li>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/admin/doctors/&lt;id&gt;/approve</span> — Grants access</li>
+<li><span class="method method-get">GET</span> <span class="endpoint">/api/admin/stats</span> — Dashboard charts data</li>
+</ul>
+
+<h3>C. Patients (<code>patient_routes.py</code>)</h3>
+<ul>
+<li><span class="method method-get">GET</span> <span class="endpoint">/api/patients</span> — Scan history</li>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/patients/&lt;id&gt;/notes</span> — Add clinical notes</li>
+</ul>
+
+<h3>D. Analysis (<code>analysis_routes.py</code>)</h3>
+<ul>
+<li><span class="method method-post">POST</span> <span class="endpoint">/api/analysis/predict</span> — Full inference pipeline</li>
+</ul>
+
+<h3>E. Hospitals (<code>hospital_routes.py</code>)</h3>
+<ul>
+<li><span class="method method-get">GET</span> <span class="endpoint">/api/hospitals/search</span> — Hospital autocomplete</li>
+</ul>
+
+<h2>Middleware Security</h2>
+<pre><code>@require_auth
+def my_secure_route(current_user):
+    pass</code></pre>
+
+<hr>
+
+<!-- ===================== SECTION 5 ===================== -->
+<h1 id="sec5">05. ML Engine Documentation</h1>
+
+<p>The ML Engine is a dedicated Flask micro-service (<code>api_server.py</code>) on <strong>Port 5001</strong>.</p>
+
+<h2>The TensorFlow Model</h2>
+<ul>
+<li><strong>File:</strong> <code>models_lcscnet_full/lcscnet_fold1.h5</code> (~4.5 MB)</li>
+<li><strong>Output:</strong> 3-class probability array <code>[Adenocarcinoma, Normal, Squamous Cell Carcinoma]</code></li>
+</ul>
+
+<h2>Inference Pipeline</h2>
+<h3>Phase 1: H&E Gatekeeper</h3>
+<p>Analyzes RGB pixels to reject non-medical images with a <code>422</code> error.</p>
+
+<h3>Phase 2: Macenko Normalization</h3>
+<p>Standardizes stain colors. Resizes image to 224×224 pixels.</p>
+
+<h3>Phase 3: TensorFlow Inference</h3>
+<p>Outputs 3 probabilities. If confidence is below 55%, returns "Inconclusive — Manual Review Required".</p>
+
+<hr>
+
+<!-- ===================== SECTION 6 ===================== -->
+<h1 id="sec6">06. Database Schema Guide</h1>
+
+<h2>Table Structures</h2>
+
+<h3>A. <code>doctors</code> Table</h3>
+<table>
+<thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>id</code></td><td>SERIAL PK</td><td>Unique ID</td></tr>
+<tr><td><code>full_name</code></td><td>VARCHAR(255)</td><td>Doctor's name</td></tr>
+<tr><td><code>email</code></td><td>VARCHAR(255) UNIQUE</td><td>Login email</td></tr>
+<tr><td><code>password_hash</code></td><td>VARCHAR(255)</td><td>bcrypt hashed password</td></tr>
+<tr><td><code>role</code></td><td>VARCHAR(20)</td><td>'admin' or 'doctor'</td></tr>
+<tr><td><code>is_approved</code></td><td>INTEGER</td><td>0=Pending, 1=Approved</td></tr>
+</tbody>
+</table>
+
+<h3>B. <code>patients</code> Table</h3>
+<table>
+<thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>id</code></td><td>SERIAL PK</td><td>Unique scan ID</td></tr>
+<tr><td><code>doctor_id</code></td><td>INTEGER FK</td><td>References doctors(id)</td></tr>
+<tr><td><code>prediction_result</code></td><td>VARCHAR(255)</td><td>ML prediction</td></tr>
+<tr><td><code>confidence</code></td><td>VARCHAR(50)</td><td>ML probability</td></tr>
+<tr><td><code>image_path</code></td><td>TEXT</td><td>Base64 encoded slide image</td></tr>
+</tbody>
+</table>
+
+<h3>C. <code>audit_logs</code> Table</h3>
+<p>HIPAA-compliant log of all system actions. Cannot be modified from the frontend.</p>
+
+<hr>
+
+<!-- ===================== SECTION 7 ===================== -->
+<h1 id="sec7">07. pgAdmin4 Management Guide</h1>
+
+<h2>Connecting to Neon</h2>
+<ol>
+<li>Open pgAdmin4 → Right-click Servers → Register → Server</li>
+<li><strong>Host:</strong> <code>ep-morning-sea-aoi12tm7-pooler.c-2.ap-southeast-1.aws.neon.tech</code></li>
+<li><strong>Port:</strong> <code>5432</code> | <strong>Database:</strong> <code>neondb</code> | <strong>Username:</strong> <code>neondb_owner</code></li>
+<li>Set <code>sslmode = require</code> in Parameters tab.</li>
+</ol>
+
+<h2>Browsing Data</h2>
+<p>Expand tree: Servers → neondb → Schemas → public → Tables. Right-click any table → View/Edit Data → All Rows.</p>
+
+<hr>
+
+<!-- ===================== SECTION 8 ===================== -->
+<h1 id="sec8">08. SQL Data Retrieval Guide</h1>
+
+<h2>Useful Queries</h2>
+<pre><code>-- All registered doctors
+SELECT id, full_name, email, role, hospital, is_approved FROM doctors ORDER BY id;
+
+-- All patient scans
+SELECT id, patient_name, age, prediction_result, subtype, scan_date FROM patients ORDER BY scan_date DESC;
+
+-- Cases by cancer subtype
+SELECT subtype, COUNT(*) as count FROM patients WHERE subtype != 'Normal / Benign Lung Tissue' GROUP BY subtype;
+
+-- Last 10 security events
+SELECT timestamp, actor_name, action, detail FROM audit_logs ORDER BY timestamp DESC LIMIT 10;</code></pre>
+
+<div class="warn-box">
+Always use a <code>WHERE</code> clause with <code>UPDATE</code> and <code>DELETE</code> commands!
+</div>
+
+<hr>
+
+<!-- ===================== SECTION 9 ===================== -->
+<h1 id="sec9">09. Authentication & Security Guide</h1>
+
+<h2>1. Password Hashing (bcrypt)</h2>
+<pre><code>hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')</code></pre>
+
+<h2>2. JSON Web Tokens (JWT)</h2>
+<pre><code>token = jwt.encode({
+    'user_id': user['id'],
+    'role': user['role'],
+    'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8)
+}, settings.JWT_SECRET_KEY, algorithm="HS256")</code></pre>
+
+<h2>3. Role-Based Access Control</h2>
+<p>Two roles: <code>admin</code> and <code>doctor</code>. Protected by <code>@require_admin</code> decorator.</p>
+
+<h2>4. Approval System</h2>
+<p>New registrations start with <code>is_approved = 0</code>. Admin must manually approve.</p>
+
+<h2>5. Brute Force Protection</h2>
+<p>5 failed attempts per minute from same IP → temporary block.</p>
+
+<hr>
+
+<!-- ===================== SECTION 10 ===================== -->
+<h1 id="sec10">10. Deployment Guide</h1>
+
+<h2>Local Mode</h2>
+<p>Double-click <code>start_all.bat</code>. Uses SQLite, runs on localhost:5099 + localhost:5001.</p>
+
+<h2>Cloud Mode</h2>
+<table>
+<thead><tr><th>Component</th><th>Provider</th><th>URL</th></tr></thead>
+<tbody>
+<tr><td>Landing Page</td><td>Netlify</td><td>cancerscan-ai.netlify.app</td></tr>
+<tr><td>Backend + ML</td><td>Render</td><td>cancerscan.onrender.com</td></tr>
+<tr><td>Database</td><td>Neon.tech</td><td>neondb</td></tr>
+<tr><td>Desktop App</td><td>GitHub Releases</td><td>.exe download</td></tr>
+</tbody>
+</table>
+
+<hr>
+
+<!-- ===================== SECTION 11 ===================== -->
+<h1 id="sec11">11. GitHub Release Guide</h1>
+<ol>
+<li>Run <code>npm run package</code> in frontend folder.</li>
+<li>Go to GitHub → Releases → Create new release.</li>
+<li>Tag: <code>v1.0.0</code>, attach the <code>.exe</code> file.</li>
+<li>Click Publish release.</li>
+</ol>
+
+<hr>
+
+<!-- ===================== SECTION 12 ===================== -->
+<h1 id="sec12">12. Team Onboarding Guide</h1>
+
+<h2>Prerequisites</h2>
+<ol>
+<li><strong>Python 3.11</strong> (NOT 3.12/3.13 — TensorFlow incompatible)</li>
+<li><strong>Node.js LTS</strong></li>
+</ol>
+
+<h2>Setup Steps</h2>
+<pre><code>git clone https://github.com/prerana-chavan/CancerScan.git
+cd CancerScan
+cd frontend && npm install && cd ..
+cd backend && pip install -r requirements.txt && cd ..</code></pre>
+
+<p>Then double-click <code>start_all.bat</code>. Login: <code>admin@cancerscan.app</code> / <code>Admin@123</code></p>
+
+<hr>
+
+<!-- ===================== SECTION 13 ===================== -->
+<h1 id="sec13">13. Viva Preparation Guide</h1>
+
+<div class="qa-question">Q1: Why Electron Desktop App instead of a website?</div>
+<div class="qa-answer">"Medical data is highly sensitive. A desktop app feels native and secure. It also allows future local GPU processing."</div>
+
+<div class="qa-question">Q2: Why two separate ports/services?</div>
+<div class="qa-answer">"Microservices architecture. Decouples ML from DB operations. Prevents heavy inference from blocking routine queries."</div>
+
+<div class="qa-question">Q3: Purpose of Macenko Normalization?</div>
+<div class="qa-answer">"Standardizes H&E stain colors across hospitals. Prevents CNN from learning color biases."</div>
+
+<div class="qa-question">Q4: What if someone uploads a non-medical image?</div>
+<div class="qa-answer">"H&E Gatekeeper analyzes RGB distribution. Rejects non-tissue images with 422 error before TensorFlow sees it."</div>
+
+<div class="qa-question">Q5: Why TensorFlow-CPU on Render?</div>
+<div class="qa-answer">"Render's free tier has no GPU. Full TensorFlow wastes 80MB RAM on CUDA libraries. CPU version prevents OOM crashes."</div>
+
+<div class="qa-question">Q6: How are passwords secured?</div>
+<div class="qa-answer">"bcrypt with salt, 12 rounds. Even with database access, passwords cannot be reverse-engineered."</div>
+
+<div class="qa-question">Q7: How are images stored in the database?</div>
+<div class="qa-answer">"Base64 encoded strings in a TEXT column. Images resized to 500px = ~75KB each. Self-contained, no S3 needed."</div>
+
+<hr>
+
+<!-- ===================== SECTION 14 ===================== -->
+<h1 id="sec14">14. System Architecture Guide</h1>
+
+<div class="arch-diagram">
+<div class="arch-layer layer-public">
+<div class="layer-title">🌐 Public Web Layer</div>
+<div class="layer-detail">Landing Page (Netlify) | GitHub Releases (Download Hub)</div>
+</div>
+<span class="arrow">⬇</span>
+<div class="arch-layer layer-client">
+<div class="layer-title">💻 Client Layer — Doctor's PC</div>
+<div class="layer-detail">Desktop Application (Electron .exe + React)</div>
+</div>
+<span class="arrow">⬇ HTTP + JWT Auth</span>
+<div class="arch-layer layer-server">
+<div class="layer-title">☁️ Server Layer — Render Cloud</div>
+<div class="layer-detail">Main Backend (Flask:5099) ⟷ ML Engine (TensorFlow:5001)</div>
+</div>
+<span class="arrow">⬇ SQL Queries</span>
+<div class="arch-layer layer-db">
+<div class="layer-title">🗄️ Data Layer — Neon.tech</div>
+<div class="layer-detail">PostgreSQL Database (neondb)</div>
+</div>
+</div>
+
+<h2>Data Flow: Processing a Scan</h2>
+<ol>
+<li>Doctor opens Electron app → "Analysis" screen</li>
+<li>Uploads slide image + patient details</li>
+<li>Axios sends POST to <code>/api/analysis/predict</code> with JWT</li>
+<li><code>@require_auth</code> middleware verifies JWT</li>
+<li>Backend saves image temporarily, forwards to ML Engine</li>
+<li>Gatekeeper validates H&E staining</li>
+<li>Macenko normalizes colors</li>
+<li>TensorFlow returns 3-class probabilities</li>
+<li>Backend saves Base64 image + results to Neon DB</li>
+<li>Frontend displays result, enables PDF download</li>
+</ol>
+
+</body>
+</html>

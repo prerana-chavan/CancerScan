@@ -54,8 +54,8 @@ export default function UserManagementPage() {
                 <div className="flex flex-col gap-1">
                     <h2 className="text-2xl font-black text-[color:var(--text-primary)] tracking-tight uppercase font-display">User Governance</h2>
                     <p className="text-xs font-bold text-[color:var(--text-secondary)] uppercase tracking-widest">Control access, assign clinical roles, and monitor investigator activity</p>
+                </div>
             </div>
-
             <div className="bg-[color:var(--bg-surface)] border border-[color:var(--border-subtle)] rounded-2xl overflow-hidden shadow-2xl">
                 <div className="p-4 border-b border-[color:var(--border-subtle)] flex items-center gap-4 bg-[color:var(--bg-surface-alt)]">
                     <div className="relative flex-1">

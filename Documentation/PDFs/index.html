@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CancerScan — Complete Documentation Index</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);color:#e2e8f0;padding:40px}
+.container{max-width:900px;margin:0 auto}
+.header{text-align:center;margin-bottom:50px}
+.logo-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:12px 32px;border-radius:30px;font-size:14pt;font-weight:700;color:#fff;letter-spacing:1px;margin-bottom:20px;box-shadow:0 8px 30px rgba(59,130,246,0.3)}
+.header h1{font-size:32pt;font-weight:800;background:linear-gradient(135deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+.header p{color:#94a3b8;font-size:12pt;max-width:600px;margin:0 auto}
+.instructions{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:16px;padding:24px 30px;margin-bottom:40px;text-align:center}
+.instructions h3{color:#60a5fa;margin-bottom:8px;font-size:13pt}
+.instructions p{color:#94a3b8;font-size:10.5pt;line-height:1.6}
+.instructions kbd{background:#1e293b;border:1px solid #475569;padding:3px 8px;border-radius:5px;font-size:9.5pt;color:#e2e8f0;font-family:'Inter',sans-serif}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:rgba(30,41,59,0.8);border:1px solid rgba(148,163,184,0.1);border-radius:16px;padding:24px;transition:all 0.3s;cursor:pointer;text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);opacity:0;transition:opacity 0.3s}
+.card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.3);border-color:rgba(59,130,246,0.3)}
+.card:hover::before{opacity:1}
+.card-number{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;width:36px;height:36px;border-radius:10px;text-align:center;line-height:36px;font-weight:700;font-size:11pt;margin-bottom:12px}
+.card-title{font-size:13pt;font-weight:700;color:#f1f5f9;margin-bottom:6px}
+.card-desc{font-size:9.5pt;color:#94a3b8;line-height:1.5}
+.footer{text-align:center;margin-top:50px;color:#475569;font-size:9pt}
+.print-all{display:block;text-align:center;margin:30px auto 0;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:16px 40px;border-radius:14px;font-size:12pt;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(16,185,129,0.3);transition:all 0.3s;text-decoration:none;display:inline-block;font-family:'Inter',sans-serif}
+.print-all:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(16,185,129,0.4)}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="header">
+<div class="logo-badge">🔬 CANCERSCAN</div>
+<h1>Project Documentation</h1>
+<p>Complete technical documentation for the CancerScan Lung Cancer Detection System. Academic Year 2025-2026.</p>
+</div>
+
+<div class="instructions">
+<h3>📄 How to Save as PDF</h3>
+<p>Click any document below → It opens in a new tab → Click the <strong>"Save as PDF"</strong> button (or press <kbd>Ctrl</kbd> + <kbd>P</kbd> → Select <strong>"Save as PDF"</strong> as destination → Click <strong>Save</strong>)</p>
+</div>
+
+<div class="grid">
+<a class="card" href="01_Project_Overview.html">
+<div class="card-number">01</div>
+<div class="card-title">Project Overview</div>
+<div class="card-desc">Project identity, team members, abstract, problem statement and core features.</div>
+</a>
+<a class="card" href="02_Folder_Structure.html">
+<div class="card-number">02</div>
+<div class="card-title">Folder Structure</div>
+<div class="card-desc">Complete repository structure for frontend, backend, and documentation.</div>
+</a>
+<a class="card" href="03_Frontend_Electron_Guide.html">
+<div class="card-number">03</div>
+<div class="card-title">Frontend & Electron Guide</div>
+<div class="card-desc">React 18, Vite, Electron 28 setup, API connection logic, and .exe packaging.</div>
+</a>
+<a class="card" href="04_Backend_API_Documentation.html">
+<div class="card-number">04</div>
+<div class="card-title">Backend API Documentation</div>
+<div class="card-desc">Flask server, all 5 API route blueprints, and middleware security.</div>
+</a>
+<a class="card" href="05_ML_Engine_Documentation.html">
+<div class="card-number">05</div>
+<div class="card-title">ML Engine Documentation</div>
+<div class="card-desc">TensorFlow model, H&E Gatekeeper, Macenko normalization, inference pipeline.</div>
+</a>
+<a class="card" href="06_Database_Schema_Guide.html">
+<div class="card-number">06</div>
+<div class="card-title">Database Schema Guide</div>
+<div class="card-desc">ERD diagram, doctors/patients/audit_logs table structures.</div>
+</a>
+<a class="card" href="07_pgAdmin4_Management_Guide.html">
+<div class="card-number">07</div>
+<div class="card-title">pgAdmin4 Management Guide</div>
+<div class="card-desc">Connecting to Neon, browsing data visually, CSV export, backups.</div>
+</a>
+<a class="card" href="08_SQL_Data_Retrieval_Guide.html">
+<div class="card-number">08</div>
+<div class="card-title">SQL Data Retrieval Guide</div>
+<div class="card-desc">Ready-to-use SQL queries for Viva demonstrations.</div>
+</a>
+<a class="card" href="09_Authentication_Security_Guide.html">
+<div class="card-number">09</div>
+<div class="card-title">Authentication & Security</div>
+<div class="card-desc">bcrypt password hashing, JWT tokens, RBAC, approval system, brute force protection.</div>
+</a>
+<a class="card" href="10_Deployment_Guide.html">
+<div class="card-number">10</div>
+<div class="card-title">Deployment Guide</div>
+<div class="card-desc">Local vs Cloud deployment, Render setup, environment variables.</div>
+</a>
+<a class="card" href="11_GitHub_Release_Guide.html">
+<div class="card-number">11</div>
+<div class="card-title">GitHub Release Guide</div>
+<div class="card-desc">Building the .exe, uploading to GitHub Releases, sharing the link.</div>
+</a>
+<a class="card" href="12_Team_Onboarding_Guide.html">
+<div class="card-number">12</div>
+<div class="card-title">Team Onboarding Guide</div>
+<div class="card-desc">Step-by-step setup for new team members, prerequisites and first run.</div>
+</a>
+<a class="card" href="13_Viva_Preparation_Guide.html">
+<div class="card-number">13</div>
+<div class="card-title">Viva Preparation Guide</div>
+<div class="card-desc">9 expected examiner questions with professional answers.</div>
+</a>
+<a class="card" href="14_System_Architecture_Guide.html">
+<div class="card-number">14</div>
+<div class="card-title">System Architecture Guide</div>
+<div class="card-desc">Complete deployment architecture and data flow for processing a scan.</div>
+</a>
+</div>
+
+<div style="text-align:center;margin-top:30px">
+<a class="print-all" href="15_Master_Combined_Documentation.html">📋 Open Complete Combined Documentation</a>
+</div>
+
+<div class="footer">
+<p>CancerScan © 2025-2026 | Dr. Vithalrao Vikhe Patil College of Engineering, Ahilyanagar</p>
+</div>
+</div>
+
+</body>
+</html>

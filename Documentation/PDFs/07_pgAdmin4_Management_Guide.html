@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07. pgAdmin4 Management Guide — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+.tip-box{border-left:4px solid #10b981;margin:18px 0;padding:14px 22px;background:#ecfdf5;border-radius:0 10px 10px 0;color:#065f46}
+.tip-box::before{content:"💡 TIP";font-weight:700;display:block;margin-bottom:6px}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+<span class="doc-badge">CANCERSCAN DOCUMENTATION</span>
+
+<h1>07. pgAdmin4 Management Guide</h1>
+
+<p>pgAdmin4 is a popular desktop application used to visually manage PostgreSQL databases. This guide shows how to connect pgAdmin4 to your Neon cloud database.</p>
+
+<h2>1. Connecting pgAdmin4 to Neon</h2>
+<ol>
+<li>Open <strong>pgAdmin4</strong> on your computer.</li>
+<li>In the top left corner, right-click <strong>Servers</strong> → <strong>Register</strong> → <strong>Server...</strong></li>
+<li>In the <strong>General</strong> tab:
+<ul><li><strong>Name:</strong> <code>CancerScan Neon DB</code></li></ul></li>
+<li>In the <strong>Connection</strong> tab, enter your Neon credentials:
+<ul>
+<li><strong>Host name/address:</strong> <code>ep-morning-sea-aoi12tm7-pooler.c-2.ap-southeast-1.aws.neon.tech</code></li>
+<li><strong>Port:</strong> <code>5432</code></li>
+<li><strong>Maintenance database:</strong> <code>neondb</code></li>
+<li><strong>Username:</strong> <code>neondb_owner</code></li>
+<li><strong>Password:</strong> <em>(Enter the password from your Neon dashboard)</em></li>
+<li><strong>Save password?</strong> Check the box.</li>
+</ul></li>
+<li>In the <strong>Parameters</strong> tab:
+<ul>
+<li>Click the <code>+</code> button to add a new parameter.</li>
+<li><strong>Role:</strong> <code>sslmode</code></li>
+<li><strong>Value:</strong> <code>require</code></li>
+<li><em>(Neon databases absolutely require SSL to connect).</em></li>
+</ul></li>
+<li>Click <strong>Save</strong>.</li>
+</ol>
+
+<h2>2. Browsing Data Without Writing SQL</h2>
+<p>If you don't know SQL, you can still view all your data easily:</p>
+<ol>
+<li>Expand the tree on the left: <code>Servers</code> → <code>CancerScan Neon DB</code> → <code>Databases</code> → <code>neondb</code> → <code>Schemas</code> → <code>public</code> → <code>Tables</code>.</li>
+<li>You will see your 4 tables: <code>audit_logs</code>, <code>doctors</code>, <code>password_reset_tokens</code>, <code>patients</code>.</li>
+<li><strong>Right-click</strong> on a table (for example, <code>doctors</code>).</li>
+<li>Select <strong>View/Edit Data</strong> → <strong>All Rows</strong>.</li>
+<li>The data will appear in a spreadsheet-like grid at the bottom of the screen.</li>
+<li>You can literally double-click a cell to change the data, and then click the <strong>Save Data Changes</strong> (floppy disk) icon at the top of the grid to save it.</li>
+</ol>
+
+<h2>3. Exporting Data to CSV Visually</h2>
+<p>If the professors ask you to prove the data is real, you can export it:</p>
+<ol>
+<li>Right-click the <code>patients</code> table.</li>
+<li>Select <strong>Import/Export Data...</strong></li>
+<li>Switch the slider at the top to <strong>Export</strong>.</li>
+<li><strong>Filename:</strong> Click the folder icon and choose where to save it on your computer (e.g., <code>Desktop\patients_export.csv</code>).</li>
+<li><strong>Format:</strong> Choose <code>csv</code>.</li>
+<li><strong>Header:</strong> Switch to <code>Yes</code> (so the CSV has column names).</li>
+<li>Click <strong>OK</strong>.</li>
+</ol>
+
+<h2>4. Backing Up the Database</h2>
+<p>To create a complete backup of the cloud database onto your local laptop:</p>
+<ol>
+<li>Right-click the <code>neondb</code> database in the tree.</li>
+<li>Select <strong>Backup...</strong></li>
+<li><strong>Filename:</strong> <code>Desktop\cancerscan_backup.sql</code></li>
+<li><strong>Format:</strong> Choose <code>Plain</code> (so you can read the SQL code later).</li>
+<li>Click <strong>Backup</strong>.</li>
+</ol>
+
+<div class="tip-box">
+Always run a backup the night before your Viva presentation!
+</div>
+
+</body>
+</html>

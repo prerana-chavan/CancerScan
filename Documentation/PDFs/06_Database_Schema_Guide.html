@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06. Database Schema Guide — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+.caution-box{border-left:4px solid #ef4444;margin:18px 0;padding:14px 22px;background:#fef2f2;border-radius:0 10px 10px 0;color:#991b1b}
+.caution-box::before{content:"⚠️ CAUTION";font-weight:700;display:block;margin-bottom:6px}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:10pt}
+thead th{background:#1e40af;color:#fff;padding:10px 14px;text-align:left;font-weight:600}
+tbody td{padding:9px 14px;border-bottom:1px solid #e2e8f0}
+tbody tr:nth-child(even){background:#f8fafc}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+<span class="doc-badge">CANCERSCAN DOCUMENTATION</span>
+
+<h1>06. Database Schema Guide</h1>
+
+<p>CancerScan uses PostgreSQL hosted on Neon.tech. The database structure is defined in <code>backend/database/db.py</code>.</p>
+
+<h2>1. Entity Relationship Diagram (ERD)</h2>
+<p><em>The ERD shows three main entities: <strong>DOCTORS</strong>, <strong>PATIENTS</strong>, and <strong>AUDIT_LOGS</strong>. Doctors have a one-to-many relationship with both Patients and Audit Logs.</em></p>
+
+<h2>2. Table Structures</h2>
+
+<h3>A. <code>doctors</code> Table</h3>
+<p>Stores all user accounts (both administrators and pathologists).</p>
+
+<table>
+<thead>
+<tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>id</code></td><td>SERIAL</td><td>PRIMARY KEY</td><td>Unique ID</td></tr>
+<tr><td><code>full_name</code></td><td>VARCHAR(255)</td><td>NOT NULL</td><td>Doctor's name</td></tr>
+<tr><td><code>email</code></td><td>VARCHAR(255)</td><td>UNIQUE, NOT NULL</td><td>Login email</td></tr>
+<tr><td><code>password_hash</code></td><td>VARCHAR(255)</td><td>NOT NULL</td><td>bcrypt hashed password</td></tr>
+<tr><td><code>medical_license_id</code></td><td>VARCHAR(100)</td><td></td><td>Medical registration number</td></tr>
+<tr><td><code>role</code></td><td>VARCHAR(20)</td><td>DEFAULT 'doctor'</td><td>'admin' or 'doctor'</td></tr>
+<tr><td><code>is_approved</code></td><td>INTEGER</td><td>DEFAULT 0</td><td>0=Pending, 1=Approved</td></tr>
+</tbody>
+</table>
+
+<h3>B. <code>patients</code> Table</h3>
+<p>Stores the actual scan records.</p>
+
+<table>
+<thead>
+<tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>id</code></td><td>SERIAL</td><td>PRIMARY KEY</td><td>Unique scan ID</td></tr>
+<tr><td><code>doctor_id</code></td><td>INTEGER</td><td>FOREIGN KEY</td><td>References doctors(id)</td></tr>
+<tr><td><code>prediction_result</code></td><td>VARCHAR(255)</td><td></td><td>"Cancer Detected", "Benign", etc.</td></tr>
+<tr><td><code>confidence</code></td><td>VARCHAR(50)</td><td></td><td>ML probability (e.g. "0.98")</td></tr>
+<tr><td><code>subtype</code></td><td>VARCHAR(100)</td><td></td><td>"Adenocarcinoma", "SCC", etc.</td></tr>
+<tr><td><code>image_path</code></td><td>TEXT</td><td></td><td><strong>The slide image, encoded in Base64</strong></td></tr>
+<tr><td><code>notes</code></td><td>TEXT</td><td></td><td>Doctor's clinical notes</td></tr>
+</tbody>
+</table>
+
+<div class="caution-box">
+The <code>image_path</code> column does not store a file path. It stores the entire image converted into Base64 text (e.g., <code>data:image/jpeg;base64,/9j/4AAQ...</code>). This means each patient record is approximately 50-100 KB in size.
+</div>
+
+<h3>C. <code>audit_logs</code> Table</h3>
+<p>A HIPAA-compliant log of all system actions. Every login, logout, registration, approval, and scan is recorded here. This table cannot be modified from the frontend application.</p>
+
+<h2>3. Database Initialization</h2>
+<p>When the backend starts, <code>db.py</code> calls <code>init_db()</code>. This uses the SQL command <code>CREATE TABLE IF NOT EXISTS</code>. This means the tables are automatically created on Neon the very first time the app starts, without needing manual SQL scripts.</p>
+
+</body>
+</html>

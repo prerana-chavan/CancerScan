@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02. Folder Structure — CancerScan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;font-size:11pt;line-height:1.75;color:#1e293b;max-width:800px;margin:0 auto;padding:60px 40px;background:#fff}
+h1{font-size:26pt;font-weight:800;color:#0f172a;border-bottom:4px solid #3b82f6;padding-bottom:12px;margin-bottom:28px;letter-spacing:-0.5px}
+h2{font-size:16pt;font-weight:700;color:#1e40af;margin-top:32px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}
+h3{font-size:13pt;font-weight:600;color:#334155;margin-top:22px;margin-bottom:10px}
+p{margin-bottom:12px;text-align:justify}
+ul,ol{margin-bottom:14px;padding-left:28px}
+li{margin-bottom:6px}
+li strong{color:#0f172a}
+code{font-family:'Fira Code',monospace;font-size:9.5pt;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#dc2626}
+pre{background:#1e293b;color:#e2e8f0;padding:18px 22px;border-radius:10px;font-family:'Fira Code',monospace;font-size:9pt;line-height:1.6;margin:18px 0;border-left:4px solid #3b82f6;overflow-x:auto}
+pre code{background:none;color:#e2e8f0;padding:0}
+a{color:#2563eb;text-decoration:none;border-bottom:1px solid #93c5fd}
+a:hover{color:#1d4ed8}
+blockquote{border-left:4px solid #3b82f6;margin:18px 0;padding:14px 22px;background:#eff6ff;border-radius:0 10px 10px 0;color:#1e40af}
+hr{border:none;border-top:2px solid #e2e8f0;margin:28px 0}
+.doc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;padding:6px 16px;border-radius:20px;font-size:9pt;font-weight:600;letter-spacing:0.5px;margin-bottom:20px}
+.print-btn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:11pt;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(59,130,246,0.4);transition:all 0.3s;z-index:999;font-family:'Inter',sans-serif}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5)}
+@media print{.print-btn{display:none!important}body{padding:0;max-width:100%}@page{margin:2cm 2.5cm}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+<span class="doc-badge">CANCERSCAN DOCUMENTATION</span>
+
+<h1>02. Folder Structure</h1>
+
+<p>The CancerScan repository is divided into two primary directories: <code>frontend</code> and <code>backend</code>.</p>
+
+<h2>1. High-Level Architecture</h2>
+
+<pre><code>CancerScan/
+│
+├── frontend/               # React + Electron Desktop App
+│   ├── src/                # UI Components and API logic
+│   ├── electron/           # Desktop packaging scripts
+│   └── package.json        # Node.js dependencies
+│
+├── backend/                # Flask API + TensorFlow ML Engine
+│   ├── routes/             # API Endpoints (Auth, Patients, etc.)
+│   ├── database/           # PostgreSQL/SQLite connection logic
+│   ├── models_lcscnet_full/# Saved .h5 TensorFlow models
+│   ├── uploads/            # Temporary storage for uploaded slides
+│   ├── app.py              # Main Flask Entry Point
+│   └── api_server.py       # ML Engine Entry Point
+│
+├── Documentation/          # Project documentation files (You are here)
+│
+├── start_all.bat           # Local development launch script
+└── LOCAL_SETUP_GUIDE.md    # Instructions for running offline</code></pre>
+
+<h2>2. Frontend Detailed Structure</h2>
+
+<pre><code>frontend/
+├── electron/
+│   ├── main.cjs            # Electron window creation and OS integration
+│   └── preload.cjs         # Secure bridge between React and Electron
+│
+├── src/
+│   ├── assets/             # Images, icons, and logos
+│   ├── components/         # Reusable React components (Buttons, Inputs)
+│   ├── config/
+│   │   └── api.js          # Auto-detects Render URL vs Localhost URL
+│   ├── layouts/            # Page wrappers (Sidebar, Navbar)
+│   ├── pages/              # Main screens (Dashboard, Analysis, Admin)
+│   ├── services/           # Axios HTTP calls to backend
+│   └── App.jsx             # React Router setup
+│
+├── dist/                   # Built React website (Internal)
+└── dist-electron/          # FINAL OUTPUT: Contains the setup .exe file</code></pre>
+
+<h2>3. Backend Detailed Structure</h2>
+
+<pre><code>backend/
+├── routes/
+│   ├── admin_routes.py     # Doctor approval and system stats
+│   ├── analysis_routes.py  # Image upload and saving results
+│   ├── auth_routes.py      # Login, Register, JWT generation
+│   ├── hospital_routes.py  # Google Places autocomplete
+│   └── patient_routes.py   # Patient history CRUD
+│
+├── database/
+│   └── db.py               # Handles connection to Neon or Local SQLite
+│
+├── middleware/
+│   └── auth_middleware.py  # @require_auth decorator for route security
+│
+├── config/
+│   └── settings.py         # Loads environment variables
+│
+├── models_lcscnet_full/
+│   └── lcscnet_fold1.h5    # The trained Neural Network model (4.5 MB)
+│
+├── utils/
+│   ├── audit_logger.py     # Logs security events to database
+│   └── ...
+│
+├── app.py                  # Runs on Port 5099. Handles all DB traffic
+├── api_server.py           # Runs on Port 5001. Handles all ML traffic
+├── auto_seed.py            # Automatically creates Admin account on Render
+├── start.sh                # Render cloud startup script
+└── requirements.txt        # Python pip dependencies</code></pre>
+
+<h2>4. Key Files to Know</h2>
+
+<ol>
+<li><strong><code>frontend/src/config/api.js</code></strong>: If your app is trying to connect to the wrong server, this is where you fix it. It tells the frontend whether to talk to Render or localhost.</li>
+<li><strong><code>backend/start.sh</code></strong>: This file tells Render <em>how</em> to start your app in the cloud. It boots up the ML server, waits 5 seconds, and then boots up the main server.</li>
+<li><strong><code>backend/database/db.py</code></strong>: This file decides whether to use the local SQLite database or the Neon PostgreSQL cloud database based on the <code>DATABASE_URL</code> environment variable.</li>
+</ol>
+
+</body>
+</html>
